@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Receipt,
@@ -42,6 +42,13 @@ export function Sidebar() {
   const sidebarCollapsed = useUIStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
   const user = useAuthStore((s) => s.user);
+  const clearAuth = useAuthStore((s) => s.clearAuth);
+  const router = useRouter();
+
+  const handleLogout = () => {
+    clearAuth();
+    router.replace("/login");
+  };
   const pathname = usePathname();
 
   return (
@@ -131,6 +138,7 @@ export function Sidebar() {
         {/* Footer: logout */}
         <div className="shrink-0 border-t border-sidebar-border p-3">
           <button
+            onClick={handleLogout}
             title={sidebarCollapsed ? "Log Out" : undefined}
             className={cn(
               "flex w-full items-center gap-3 rounded-xl py-2 text-sm font-medium transition-colors",

@@ -26,21 +26,16 @@ export function useLogin() {
 }
 
 /**
- * useRegister — creates the account, then auto-logs-in with the same
- * credentials (backend's Register response has an empty token, so a
- * second call to /login is needed to actually get a usable session).
+ * useRegister — creates the account and auto-logs-in using the token
+ * returned directly from the register endpoint (POST /api/v1/register
+ * now returns {name, email, token} — no second login call needed).
  */
 export function useRegister() {
   const router = useRouter();
   const setAuth = useAuthStore((s) => s.setAuth);
 
   return useMutation({
-    mutationFn: async (data: AuthRegisterRequest) => {
-      await authApi.register(data);
-      // Register response has token: "" — log in right after to get a
-      // real token instead of asking the user to log in manually.
-      return authApi.login({ email: data.email, password: data.password });
-    },
+    mutationFn: (data: AuthRegisterRequest) => authApi.register(data),
     onSuccess: (response) => {
       setAuth(response);
       router.push(ROUTES.DASHBOARD);
