@@ -20,6 +20,7 @@ export function AuthVisualPanel() {
         alt="Login background"
         fill
         className="object-cover transition-opacity duration-700 ease-in-out"
+          sizes="60vw"
         style={{ opacity: isRegister ? 0 : 1 }}
         priority
       />
@@ -29,6 +30,7 @@ export function AuthVisualPanel() {
         alt="Register background"
         fill
         className="object-cover transition-opacity duration-700 ease-in-out"
+          sizes="60vw"
         style={{ opacity: isRegister ? 1 : 0 }}
         priority
       />
