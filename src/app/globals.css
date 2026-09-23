@@ -1,26 +1,130 @@
 @import "tailwindcss";
 
+/*
+  Pocketly Design System
+  - Main app: light theme, warm coral accent (ref: financial dashboard mockup)
+  - Sidebar: fixed dark theme, collapsible (ref: Zarss/Dappr mockup)
+  - Semantic finance colors: green = income, red = expense/warning
+*/
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --radius: 1.25rem;
+
+  /* Base surfaces */
+  --background: #f2efea;
+  --foreground: #1a1a1a;
+
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+
+  /* Brand / primary */
+  --primary: #e8684a;
+  --primary-hover: #d65a3d;
+  --primary-foreground: #ffffff;
+
+  --secondary: #ece6df;
+  --secondary-foreground: #1a1a1a;
+
+  --muted: #ece6df;
+  --muted-foreground: #6b6864;
+
+  --accent: #f8d6c8;
+  --accent-foreground: #1a1a1a;
+
+  --destructive: #e5484d;
+  --destructive-foreground: #ffffff;
+
+  --border: #e7e3df;
+  --input: #e7e3df;
+  --ring: #e8684a;
+
+  /* Semantic finance colors */
+  --income: #22a06b;
+  --income-foreground: #ffffff;
+  --expense: #e5484d;
+  --expense-foreground: #ffffff;
+
+  /* Chart palette (nested circle / bar chart layers) */
+  --chart-1: #e8684a; /* deep coral */
+  --chart-2: #ec8264; /* coral */
+  --chart-3: #f3ad91; /* mid peach */
+  --chart-4: #f8d6c8; /* light peach */
+  --chart-5: #8c8985; /* neutral for comparisons */
+
+  /* Sidebar — fixed dark, independent of app theme */
+  --sidebar: #1c1c1e;
+  --sidebar-foreground: #9c9c9c;
+  --sidebar-primary: #e8684a;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #2a2a2c;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #2a2a2a;
+  --sidebar-ring: #e8684a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-income: var(--income);
+  --color-income-foreground: var(--income-foreground);
+  --color-expense: var(--expense);
+  --color-expense-foreground: var(--expense-foreground);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) - 0.5rem);
+  --radius-md: calc(var(--radius) - 0.25rem);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 0.5rem);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
