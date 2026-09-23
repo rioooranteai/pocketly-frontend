@@ -44,6 +44,18 @@ export function useScanReceipt() {
   });
 }
 
+export function useUpdateTransaction() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: CreateTransactionRequest }) =>
+      transactionsApi.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: TRANSACTIONS_KEY });
+    },
+  });
+}
+
 export function useDeleteTransaction() {
   const queryClient = useQueryClient();
 

@@ -1,14 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { Receipt, Plus, Trash2 } from "lucide-react";
 
 import { useTransactions, useDeleteTransaction } from "../hooks";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { ROUTES } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 
-export function TransactionList() {
+export function TransactionList({ onAddClick }: { onAddClick: () => void }) {
   const { data: transactions, isLoading, isError } = useTransactions();
   const deleteTransaction = useDeleteTransaction();
 
@@ -42,12 +40,14 @@ export function TransactionList() {
             Mulai catat pengeluaran kamu, manual atau scan struk.
           </p>
         </div>
-        <Link href={ROUTES.TRANSACTIONS.NEW}>
-          <Button size="sm" className="mt-1 bg-primary text-primary-foreground hover:bg-primary-hover">
-            <Plus size={16} className="mr-1.5" />
-            Tambah Transaksi
-          </Button>
-        </Link>
+        <Button
+          size="sm"
+          onClick={onAddClick}
+          className="mt-1 bg-primary text-primary-foreground hover:bg-primary-hover"
+        >
+          <Plus size={16} className="mr-1.5" />
+          Tambah Transaksi
+        </Button>
       </div>
     );
   }

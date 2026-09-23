@@ -68,7 +68,7 @@ export function LoginForm() {
 
         <Button
           type="submit"
-          className="w-full bg-primary text-primary-foreground hover:bg-primary-hover"
+          className="w-full"
           disabled={login.isPending}
         >
           {login.isPending ? "Memproses..." : "Masuk"}

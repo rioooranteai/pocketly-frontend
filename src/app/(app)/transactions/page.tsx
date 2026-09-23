@@ -1,11 +1,15 @@
-import Link from "next/link";
+"use client";
+
+import { useState } from "react";
 import { Plus } from "lucide-react";
 
 import { TransactionList } from "@/features/transactions/components/transaction-list";
+import { AddTransactionModal } from "@/features/transactions/components/add-transaction-modal";
 import { Button } from "@/components/ui/button";
-import { ROUTES } from "@/lib/constants";
 
 export default function TransactionsPage() {
+  const [modalOpen, setModalOpen] = useState(false);
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
@@ -17,15 +21,18 @@ export default function TransactionsPage() {
             Semua pengeluaran yang sudah kamu catat.
           </p>
         </div>
-        <Link href={ROUTES.TRANSACTIONS.NEW}>
-          <Button className="bg-primary text-primary-foreground hover:bg-primary-hover">
-            <Plus size={16} className="mr-1.5" />
-            Tambah Transaksi
-          </Button>
-        </Link>
+        <Button
+          onClick={() => setModalOpen(true)}
+          className="bg-primary text-primary-foreground hover:bg-primary-hover"
+        >
+          <Plus size={16} className="mr-1.5" />
+          Tambah Transaksi
+        </Button>
       </div>
 
-      <TransactionList />
+      <TransactionList onAddClick={() => setModalOpen(true)} />
+
+      <AddTransactionModal open={modalOpen} onOpenChange={setModalOpen} />
     </div>
   );
 }

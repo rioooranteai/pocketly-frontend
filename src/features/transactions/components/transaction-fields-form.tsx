@@ -1,31 +1,59 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useCreateTransaction } from "../hooks";
 import { formatCurrency, cn } from "@/lib/utils";
-import { ROUTES } from "@/lib/constants";
-import { ApiError } from "@/lib/api-client";
 
-interface ItemRow {
+export interface ItemRow {
   name: string;
   quantity: string;
   price: string;
 }
 
+export interface TransactionFieldsValue {
+  description: string;
+  date: string; // yyyy-mm-dd
+  items: ItemRow[];
+}
+
 const EMPTY_ITEM: ItemRow = { name: "", quantity: "1", price: "" };
 
-export function ManualTransactionForm() {
-  const router = useRouter();
-  const createTransaction = useCreateTransaction();
+interface TransactionFieldsFormProps {
+  initialValues?: TransactionFieldsValue;
+  onSubmit: (value: TransactionFieldsValue) => void;
+  isSubmitting?: boolean;
+  submitLabel: string;
+  errorMessage?: string | null;
+}
 
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [items, setItems] = useState<ItemRow[]>([{ ...EMPTY_ITEM }]);
+/**
+ * Shared description + date + dynamic items editor. Used both for
+ * manual entry (empty initialValues) and for reviewing/editing an
+ * AI-scanned result (pre-filled initialValues) before final save —
+ * the parent step (ManualEntryStep / ScanReviewStep) owns submission
+ * and API calls.
+ */
+export function TransactionFieldsForm({
+  initialValues,
+  onSubmit,
+  isSubmitting = false,
+  submitLabel,
+  errorMessage: externalError,
+}: TransactionFieldsFormProps) {
+  const [description, setDescription] = useState(
+    initialValues?.description ?? ""
+  );
+  const [date, setDate] = useState(
+    initialValues?.date ?? new Date().toISOString().slice(0, 10)
+  );
+  const [items, setItems] = useState<ItemRow[]>(
+    initialValues?.items && initialValues.items.length > 0
+      ? initialValues.items
+      : [{ ...EMPTY_ITEM }]
+  );
   const [formError, setFormError] = useState<string | null>(null);
 
   const total = items.reduce((sum, item) => {
@@ -56,10 +84,6 @@ export function ManualTransactionForm() {
       setFormError("Deskripsi wajib diisi.");
       return;
     }
-    if (items.length === 0) {
-      setFormError("Minimal harus ada 1 item.");
-      return;
-    }
     for (const item of items) {
       if (!item.name.trim() || !item.quantity || !item.price) {
         setFormError("Semua field item (nama, jumlah, harga) wajib diisi.");
@@ -67,31 +91,10 @@ export function ManualTransactionForm() {
       }
     }
 
-    createTransaction.mutate(
-      {
-        description: description.trim(),
-        date: new Date(date).toISOString(),
-        items: items.map((item) => ({
-          name: item.name.trim(),
-          quantity: Number(item.quantity),
-          price: Number(item.price),
-        })),
-      },
-      {
-        onSuccess: () => {
-          router.push(ROUTES.TRANSACTIONS.LIST);
-        },
-      }
-    );
+    onSubmit({ description: description.trim(), date, items });
   }
 
-  const errorMessage =
-    formError ??
-    (createTransaction.isError
-      ? createTransaction.error instanceof ApiError
-        ? createTransaction.error.message
-        : "Gagal menyimpan transaksi. Coba lagi."
-      : null);
+  const errorMessage = formError ?? externalError ?? null;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -191,9 +194,9 @@ export function ManualTransactionForm() {
       <Button
         type="submit"
         className="w-full bg-primary text-primary-foreground hover:bg-primary-hover"
-        disabled={createTransaction.isPending}
+        disabled={isSubmitting}
       >
-        {createTransaction.isPending ? "Menyimpan..." : "Simpan Transaksi"}
+        {isSubmitting ? "Menyimpan..." : submitLabel}
       </Button>
     </form>
   );

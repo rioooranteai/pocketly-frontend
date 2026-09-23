@@ -84,7 +84,7 @@ export function RegisterForm() {
 
         <Button
           type="submit"
-          className="w-full bg-primary text-primary-foreground hover:bg-primary-hover"
+          className="w-full"
           disabled={register.isPending}
         >
           {register.isPending ? "Memproses..." : "Daftar"}

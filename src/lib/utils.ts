@@ -1,5 +1,58 @@
 import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { extendTailwindMerge } from "tailwind-merge";
+
+/**
+ * Custom color tokens defined via `@theme` in globals.css (design
+ * system colors like `bg-primary`, `bg-sidebar`, `text-income`, etc).
+ * twMerge doesn't know about them out of the box, so without this it
+ * can't tell e.g. `bg-neutral-900` and `bg-sidebar` conflict — both
+ * would survive a merge instead of the later one winning.
+ */
+const twMerge = extendTailwindMerge({
+  extend: {
+    theme: {
+      color: [
+        "background",
+        "foreground",
+        "card",
+        "card-foreground",
+        "popover",
+        "popover-foreground",
+        "primary",
+        "primary-hover",
+        "primary-foreground",
+        "secondary",
+        "secondary-foreground",
+        "muted",
+        "muted-foreground",
+        "accent",
+        "accent-foreground",
+        "destructive",
+        "destructive-foreground",
+        "border",
+        "input",
+        "ring",
+        "income",
+        "income-foreground",
+        "expense",
+        "expense-foreground",
+        "chart-1",
+        "chart-2",
+        "chart-3",
+        "chart-4",
+        "chart-5",
+        "sidebar",
+        "sidebar-foreground",
+        "sidebar-primary",
+        "sidebar-primary-foreground",
+        "sidebar-accent",
+        "sidebar-accent-foreground",
+        "sidebar-border",
+        "sidebar-ring",
+      ],
+    },
+  },
+});
 
 /**
  * Merge Tailwind CSS classes safely.
