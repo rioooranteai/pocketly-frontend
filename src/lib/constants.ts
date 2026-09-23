@@ -13,15 +13,15 @@ export const ROUTES = {
     REGISTER: "/register",
   },
   DASHBOARD: "/dashboard",
-  PROFILE: "/profile",
+  PROFILE: "/dashboard/profile",
   TRANSACTIONS: {
-    LIST: "/transactions",
-    NEW: "/transactions/new",
-    DETAIL: (id: string) => `/transactions/${id}`,
-    EDIT: (id: string) => `/transactions/${id}/edit`,
+    LIST: "/dashboard/transactions",
+    NEW: "/dashboard/transactions/new",
+    DETAIL: (id: string) => `/dashboard/transactions/${id}`,
+    EDIT: (id: string) => `/dashboard/transactions/${id}/edit`,
   },
-  CHATBOT: "/chatbot",
-  SETTINGS: "/settings",
+  CHATBOT: "/dashboard/chatbot",
+  SETTINGS: "/dashboard/settings",
 } as const;
 
 /**
