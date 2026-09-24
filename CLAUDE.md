@@ -46,6 +46,10 @@ Read `docs/ARCHITECTURE.md` before starting work. Key principle:
 2. **Install:** `npm install` (dependencies already in package.json)
 3. **Run:** `npm run dev` → http://localhost:3000
 4. **Lint:** `npm run lint`
+5. **Format:** `npm run format` (Prettier; `format:check` runs in CI)
+6. **Test:** `npm test` (Vitest unit/component), `npm run test:e2e` (Playwright, dummy-data mode)
+
+A husky pre-commit hook runs ESLint + Prettier on staged files. CI (`.github/workflows/ci.yml`) runs format check, lint, typecheck, tests, build and e2e.
 
 ## Coding Standards
 
