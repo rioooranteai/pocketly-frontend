@@ -1,4 +1,6 @@
-import { API_BASE_URL, API_TIMEOUT, STORAGE_KEYS } from "./constants";
+import { API_BASE_URL, API_TIMEOUT } from "@/lib/constants";
+import { getQueryClient } from "@/lib/query-client";
+import { useAuthStore } from "@/stores/auth";
 
 export interface ApiResponse<T = unknown> {
   data?: T;
@@ -25,8 +27,31 @@ export class ApiError extends Error implements ApiErrorDetail {
 }
 
 /**
+ * User-facing message for any thrown error: the backend's message for an
+ * ApiError, otherwise the caller's fallback (unexpected/non-API errors).
+ */
+export function getErrorMessage(error: unknown, fallback: string): string {
+  return error instanceof ApiError ? error.message : fallback;
+}
+
+export interface RequestOptions {
+  /** Lets TanStack Query cancel in-flight requests (unmount, key change). */
+  signal?: AbortSignal;
+}
+
+/**
+ * Expired/invalid token: drop the session and every cached query so the
+ * next user never sees this one's data. AuthGuard notices the null token
+ * and redirects to /login on its own.
+ */
+function handleUnauthorized() {
+  useAuthStore.getState().clearAuth();
+  getQueryClient().clear();
+}
+
+/**
  * HTTP client untuk komunikasi dengan backend.
- * Automatically attach auth token, handle errors, dan retry logic.
+ * Automatically attach auth token, handle errors, dan timeout.
  */
 export const apiClient = {
   async request<T = unknown>(
@@ -34,21 +59,25 @@ export const apiClient = {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
-    const token = typeof window !== "undefined" 
-      ? localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
-      : null;
+    const headers = new Headers(options.headers);
 
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-      ...options.headers,
-    };
-
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
+    // FormData needs the browser to set Content-Type (with its boundary).
+    if (!(options.body instanceof FormData) && !headers.has("Content-Type")) {
+      headers.set("Content-Type", "application/json");
     }
 
+    const token = useAuthStore.getState().token;
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+
+    // One signal for both the timeout and the caller's own cancellation.
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
+    const callerSignal = options.signal;
+    const abortFromCaller = () => controller.abort();
+    if (callerSignal?.aborted) controller.abort();
+    callerSignal?.addEventListener("abort", abortFromCaller, { once: true });
 
     try {
       const response = await fetch(url, {
@@ -56,8 +85,6 @@ export const apiClient = {
         headers,
         signal: controller.signal,
       });
-
-      clearTimeout(timeoutId);
 
       const contentType = response.headers.get("content-type");
       let data: unknown = null;
@@ -71,6 +98,12 @@ export const apiClient = {
       }
 
       if (!response.ok) {
+        // Only an authenticated request means the session died; a 401
+        // from /login is just wrong credentials.
+        if (response.status === 401 && token) {
+          handleUnauthorized();
+        }
+
         const errorMessage =
           typeof data === "object" && data !== null && "error" in data
             ? (data as { error: string }).error
@@ -91,9 +124,9 @@ export const apiClient = {
 
       return data as T;
     } catch (error) {
-      clearTimeout(timeoutId);
-
-      if (error instanceof ApiError) {
+      // Cancelled by the caller — rethrow as-is so TanStack Query treats
+      // it as a cancellation, not a timeout.
+      if (error instanceof ApiError || callerSignal?.aborted) {
         throw error;
       }
 
@@ -106,11 +139,14 @@ export const apiClient = {
       }
 
       throw error;
+    } finally {
+      clearTimeout(timeoutId);
+      callerSignal?.removeEventListener("abort", abortFromCaller);
     }
   },
 
-  get<T = unknown>(endpoint: string) {
-    return this.request<T>(endpoint, { method: "GET" });
+  get<T = unknown>(endpoint: string, { signal }: RequestOptions = {}) {
+    return this.request<T>(endpoint, { method: "GET", signal });
   },
 
   post<T = unknown>(endpoint: string, body?: unknown) {
@@ -134,62 +170,13 @@ export const apiClient = {
   /**
    * Upload file dengan multipart/form-data
    */
-  async uploadFile<T = unknown>(
+  uploadFile<T = unknown>(
     endpoint: string,
     file: File,
     fieldName: string = "file"
-  ): Promise<T> {
-    const url = `${API_BASE_URL}${endpoint}`;
-    const token = typeof window !== "undefined"
-      ? localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
-      : null;
-
+  ) {
     const formData = new FormData();
     formData.append(fieldName, file);
-
-    const headers: HeadersInit = {};
-    if (token) {
-      headers.Authorization = `Bearer ${token}`;
-    }
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
-
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: formData,
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        const errorMessage =
-          data.error || `HTTP ${response.status}`;
-        throw new ApiError(response.status, errorMessage, data);
-      }
-
-      if (typeof data === "object" && data !== null && "data" in data) {
-        return (data as { data: T }).data;
-      }
-
-      return data as T;
-    } catch (error) {
-      clearTimeout(timeoutId);
-
-      if (error instanceof ApiError) {
-        throw error;
-      }
-
-      if (error instanceof DOMException && error.name === "AbortError") {
-        throw new ApiError(0, `Request timeout (${API_TIMEOUT}ms exceeded)`);
-      }
-
-      throw error;
-    }
+    return this.request<T>(endpoint, { method: "POST", body: formData });
   },
 };

@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Receipt,
@@ -18,15 +17,19 @@ import { cn, getInitials } from "@/lib/utils";
 import { ROUTES } from "@/lib/constants";
 import { useUIStore } from "@/stores/ui-store";
 import { useAuthStore } from "@/stores/auth";
+import { useLogout } from "@/features/auth/hooks";
+import { SidebarNavItem } from "@/components/shared/sidebar-nav-item";
 
+// `comingSoon`: the page isn't built yet — shown disabled instead of
+// linking to a 404. Drop the flag once the route exists.
 const NAV_ITEMS = [
   { label: "Dashboard", href: ROUTES.DASHBOARD, icon: LayoutDashboard },
   { label: "Transactions", href: ROUTES.TRANSACTIONS.LIST, icon: Receipt },
-  { label: "Scan Receipt", href: ROUTES.TRANSACTIONS.NEW, icon: Camera },
-  { label: "Chatbot", href: ROUTES.CHATBOT, icon: MessageCircle },
-  { label: "Settings", href: ROUTES.SETTINGS, icon: Settings },
-  { label: "Profile", href: ROUTES.PROFILE, icon: User },
-] as const;
+  { label: "Scan Receipt", href: ROUTES.TRANSACTIONS.NEW, icon: Camera, comingSoon: true },
+  { label: "Chatbot", href: ROUTES.CHATBOT, icon: MessageCircle, comingSoon: true },
+  { label: "Settings", href: ROUTES.SETTINGS, icon: Settings, comingSoon: true },
+  { label: "Profile", href: ROUTES.PROFILE, icon: User, comingSoon: true },
+];
 
 /**
  * Sidebar — fixed dark theme regardless of app color mode.
@@ -42,13 +45,7 @@ export function Sidebar() {
   const sidebarCollapsed = useUIStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
   const user = useAuthStore((s) => s.user);
-  const clearAuth = useAuthStore((s) => s.clearAuth);
-  const router = useRouter();
-
-  const handleLogout = () => {
-    clearAuth();
-    router.replace("/login");
-  };
+  const logout = useLogout();
   const pathname = usePathname();
 
   return (
@@ -102,43 +99,24 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* Nav items — active state = colored icon tile + colored text */}
+        {/* Nav items */}
         <nav className="flex-1 space-y-1 px-3 mt-3">
-          {NAV_ITEMS.map(({ label, href, icon: Icon }) => {
-            const isActive = pathname === href;
-            return (
-              <Link
-                key={href}
-                href={href}
-                title={sidebarCollapsed ? label : undefined}
-                className={cn(
-                  "flex items-center gap-3 rounded-xl py-2 text-sm font-medium transition-colors",
-                  sidebarCollapsed ? "justify-center px-0" : "px-2",
-                  isActive
-                    ? "text-sidebar-primary"
-                    : "text-sidebar-foreground hover:text-white"
-                )}
-              >
-                <span
-                  className={cn(
-                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors",
-                    isActive
-                      ? "bg-sidebar-primary/15 text-sidebar-primary"
-                      : "bg-white/5 text-sidebar-foreground"
-                  )}
-                >
-                  <Icon size={17} />
-                </span>
-                {!sidebarCollapsed && <span className="truncate">{label}</span>}
-              </Link>
-            );
-          })}
+          {NAV_ITEMS.map((item) => (
+            <SidebarNavItem
+              key={item.href}
+              {...item}
+              collapsed={sidebarCollapsed}
+              isActive={
+                pathname === item.href || pathname.startsWith(`${item.href}/`)
+              }
+            />
+          ))}
         </nav>
 
         {/* Footer: logout */}
         <div className="shrink-0 border-t border-sidebar-border p-3">
           <button
-            onClick={handleLogout}
+            onClick={logout}
             title={sidebarCollapsed ? "Log Out" : undefined}
             className={cn(
               "flex w-full items-center gap-3 rounded-xl py-2 text-sm font-medium transition-colors",

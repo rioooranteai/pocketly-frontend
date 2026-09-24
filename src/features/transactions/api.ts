@@ -2,6 +2,7 @@ import { apiClient } from "@/lib/api-client";
 import type {
   CreateTransactionRequest,
   TransactionResponse,
+  UpdateTransactionRequest,
 } from "@/types/api";
 
 /**
@@ -12,19 +13,23 @@ import type {
  * here just get T back directly.
  */
 export const transactionsApi = {
-  list() {
-    return apiClient.get<TransactionResponse[]>("/api/v1/transactions");
+  list(signal?: AbortSignal) {
+    return apiClient.get<TransactionResponse[]>("/api/v1/transactions", {
+      signal,
+    });
   },
 
-  get(id: string) {
-    return apiClient.get<TransactionResponse>(`/api/v1/transactions/${id}`);
+  get(id: string, signal?: AbortSignal) {
+    return apiClient.get<TransactionResponse>(`/api/v1/transactions/${id}`, {
+      signal,
+    });
   },
 
   create(data: CreateTransactionRequest) {
     return apiClient.post<TransactionResponse>("/api/v1/transactions", data);
   },
 
-  update(id: string, data: CreateTransactionRequest) {
+  update(id: string, data: UpdateTransactionRequest) {
     return apiClient.put<TransactionResponse>(
       `/api/v1/transactions/${id}`,
       data

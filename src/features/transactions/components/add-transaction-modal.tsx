@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { ApiError } from "@/lib/api-client";
+import { getErrorMessage } from "@/lib/api-client";
 import type { TransactionResponse } from "@/types/api";
 import { useScanReceipt } from "@/features/transactions/hooks";
 import { useReceiptFile } from "@/features/transactions/hooks/use-receipt-file";
@@ -68,9 +68,7 @@ export function AddTransactionModal({
         setStep("review");
       },
       onError: (err) => {
-        receipt.setError(
-          err instanceof ApiError ? err.message : "Gagal memproses struk."
-        );
+        receipt.setError(getErrorMessage(err, "Gagal memproses struk."));
         setStep("scan-upload");
       },
     });

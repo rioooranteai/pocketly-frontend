@@ -1,24 +1,27 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { authApi } from "../api";
+import { authApi } from "@/features/auth/api";
 import { useAuthStore } from "@/stores/auth";
-import { ApiError } from "@/lib/api-client";
 import { ROUTES } from "@/lib/constants";
 import type { AuthLoginRequest, AuthRegisterRequest } from "@/types/api";
 
 /**
  * useLogin — authenticates the user, persists token+user to the auth
  * store (Zustand, backed by localStorage), then redirects to dashboard.
+ * Clears the query cache first in case a previous session ended without
+ * a logout (e.g. expired token), so no stale data from another user leaks.
  */
 export function useLogin() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const setAuth = useAuthStore((s) => s.setAuth);
 
   return useMutation({
     mutationFn: (data: AuthLoginRequest) => authApi.login(data),
     onSuccess: (response) => {
+      queryClient.clear();
       setAuth(response);
       router.push(ROUTES.DASHBOARD);
     },
@@ -32,11 +35,13 @@ export function useLogin() {
  */
 export function useRegister() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const setAuth = useAuthStore((s) => s.setAuth);
 
   return useMutation({
     mutationFn: (data: AuthRegisterRequest) => authApi.register(data),
     onSuccess: (response) => {
+      queryClient.clear();
       setAuth(response);
       router.push(ROUTES.DASHBOARD);
     },
@@ -44,12 +49,17 @@ export function useRegister() {
 }
 
 /**
- * Extracts a user-friendly error message from a mutation error.
- * Falls back to a generic message for unexpected/network errors.
+ * useLogout — ends the session and wipes every cached query, so the next
+ * user logging in on this browser never sees the previous user's data.
  */
-export function getAuthErrorMessage(error: unknown): string {
-  if (error instanceof ApiError) {
-    return error.message;
-  }
-  return "Terjadi kesalahan. Coba lagi.";
+export function useLogout() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const clearAuth = useAuthStore((s) => s.clearAuth);
+
+  return () => {
+    clearAuth();
+    queryClient.clear();
+    router.replace(ROUTES.AUTH.LOGIN);
+  };
 }

@@ -2,38 +2,43 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useLogin, getAuthErrorMessage } from "../hooks";
-import { VALIDATION } from "@/lib/constants";
+import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/ui/password-input";
+import { FieldError } from "@/components/ui/field-error";
+import { useLogin } from "@/features/auth/hooks";
+import { loginSchema, type LoginFormValues } from "@/features/auth/schemas";
+import { getErrorMessage } from "@/lib/api-client";
+import { ROUTES } from "@/lib/constants";
+import { getFieldErrors, type FieldErrors } from "@/lib/validation";
 
 export function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const [values, setValues] = useState<LoginFormValues>({
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState<FieldErrors<LoginFormValues>>({});
 
   const login = useLogin();
 
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setFormError(null);
-
-    if (!VALIDATION.EMAIL.test(email)) {
-      setFormError("Format email tidak valid.");
-      return;
-    }
-    if (!password) {
-      setFormError("Password wajib diisi.");
-      return;
-    }
-
-    login.mutate({ email, password });
+  function setField(field: keyof LoginFormValues, value: string) {
+    setValues((prev) => ({ ...prev, [field]: value }));
   }
 
-  const errorMessage = formError ?? (login.isError ? getAuthErrorMessage(login.error) : null);
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+
+    const result = loginSchema.safeParse(values);
+    if (!result.success) {
+      setErrors(getFieldErrors(result.error));
+      return;
+    }
+
+    setErrors({});
+    login.mutate(result.data);
+  }
 
   return (
     <div className="w-full max-w-sm">
@@ -43,55 +48,57 @@ export function LoginForm() {
         Masukkan email dan password untuk lanjut ke dashboard kamu.
       </p>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-        <Input
-          id="email"
-          type="email"
-          placeholder="Alamat email kamu"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="email"
-          error={!!errorMessage}
-        />
-
-        <div className="relative">
+      <form onSubmit={handleSubmit} noValidate className="mt-8 space-y-4">
+        <div>
+          <Label htmlFor="email" className="sr-only">
+            Email
+          </Label>
           <Input
-            id="password"
-            type={showPassword ? "text" : "password"}
-            placeholder="Kata sandi kamu"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            error={!!errorMessage}
-            className="pr-10"
+            id="email"
+            type="email"
+            placeholder="Alamat email kamu"
+            value={values.email}
+            onChange={(e) => setField("email", e.target.value)}
+            autoComplete="email"
+            error={!!errors.email}
+            aria-describedby={errors.email ? "email-error" : undefined}
           />
-          <button
-            type="button"
-            onClick={() => setShowPassword((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-            tabIndex={-1}
-            aria-label={showPassword ? "Sembunyikan password" : "Tampilkan password"}
-          >
-            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-          </button>
+          <FieldError id="email-error" message={errors.email} />
         </div>
 
-        {errorMessage && (
-          <p className="text-sm text-expense">{errorMessage}</p>
+        <div>
+          <Label htmlFor="password" className="sr-only">
+            Password
+          </Label>
+          <PasswordInput
+            id="password"
+            placeholder="Kata sandi kamu"
+            value={values.password}
+            onChange={(e) => setField("password", e.target.value)}
+            autoComplete="current-password"
+            error={!!errors.password}
+            aria-describedby={errors.password ? "password-error" : undefined}
+          />
+          <FieldError id="password-error" message={errors.password} />
+        </div>
+
+        {login.isError && (
+          <p role="alert" className="text-sm text-expense">
+            {getErrorMessage(login.error, "Terjadi kesalahan. Coba lagi.")}
+          </p>
         )}
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={login.isPending}
-        >
+        <Button type="submit" className="w-full" disabled={login.isPending}>
           {login.isPending ? "Memproses..." : "Masuk"}
         </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Belum punya akun?{" "}
-        <Link href="/register" className="font-medium text-primary hover:underline">
+        <Link
+          href={ROUTES.AUTH.REGISTER}
+          className="font-medium text-primary hover:underline"
+        >
           Daftar
         </Link>
       </p>

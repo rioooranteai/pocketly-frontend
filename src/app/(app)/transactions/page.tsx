@@ -23,7 +23,7 @@ export default function TransactionsPage() {
         </div>
         <Button
           onClick={() => setModalOpen(true)}
-          className="bg-primary text-primary-foreground hover:bg-primary-hover"
+          variant="primary"
         >
           <Plus size={16} className="mr-1.5" />
           Tambah Transaksi

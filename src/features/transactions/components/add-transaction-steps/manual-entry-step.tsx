@@ -1,7 +1,7 @@
 "use client";
 
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ApiError } from "@/lib/api-client";
+import { getErrorMessage } from "@/lib/api-client";
 import { useCreateTransaction } from "@/features/transactions/hooks";
 import { TransactionFieldsForm } from "@/features/transactions/components/transaction-fields-form";
 import { toTransactionPayload } from "@/features/transactions/utils";
@@ -31,9 +31,7 @@ export function ManualEntryStep({ onBack, onSaved }: ManualEntryStepProps) {
         submitLabel="Simpan Transaksi"
         errorMessage={
           createTransaction.isError
-            ? createTransaction.error instanceof ApiError
-              ? createTransaction.error.message
-              : "Gagal menyimpan transaksi."
+            ? getErrorMessage(createTransaction.error, "Gagal menyimpan transaksi.")
             : null
         }
       />

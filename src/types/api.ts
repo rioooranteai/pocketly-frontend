@@ -3,6 +3,8 @@
  * Derived from Pocketly backend Go DTOs
  */
 
+import type { TRANSACTION_CATEGORIES } from "@/lib/constants";
+
 // ============ Auth Types ============
 
 export interface AuthRegisterRequest {
@@ -49,7 +51,7 @@ export interface CreateTransactionRequest {
   items: TransactionItemRequest[];
 }
 
-export interface UpdateTransactionRequest extends CreateTransactionRequest {}
+export type UpdateTransactionRequest = CreateTransactionRequest;
 
 export interface TransactionResponse {
   id: string;
@@ -60,9 +62,8 @@ export interface TransactionResponse {
   items: TransactionItemResponse[];
 }
 
-export interface Transaction extends TransactionResponse {
-  // Alias for compatibility
-}
+/** Alias for compatibility */
+export type Transaction = TransactionResponse;
 
 // ============ List Response Types ============
 
@@ -88,16 +89,7 @@ export interface UpdateTransactionResponse {
 
 // ============ Helper Types ============
 
-export type Category = 
-  | "uncategorized"
-  | "food"
-  | "transportation"
-  | "shopping"
-  | "entertainment"
-  | "utilities"
-  | "health"
-  | "education"
-  | "other";
+export type Category = (typeof TRANSACTION_CATEGORIES)[number];
 
 export interface PaginatedResponse<T> {
   data: T[];

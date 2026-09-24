@@ -6,11 +6,16 @@ import type { User, AuthResponse } from "@/types/api";
 interface AuthState {
   token: string | null;
   user: User | null;
-  isAuthenticated: boolean;
-  
+
   setAuth: (response: AuthResponse) => void;
   clearAuth: () => void;
   setUser: (user: User) => void;
+}
+
+// The store used to persist under the key apiClient read as a raw token,
+// so the stale entry has to go. Users with it simply log in again once.
+if (typeof window !== "undefined") {
+  localStorage.removeItem(STORAGE_KEYS.LEGACY_AUTH_TOKEN);
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -18,7 +23,6 @@ export const useAuthStore = create<AuthState>()(
     (set) => ({
       token: null,
       user: null,
-      isAuthenticated: false,
 
       setAuth: (response) => {
         set({
@@ -27,16 +31,11 @@ export const useAuthStore = create<AuthState>()(
             name: response.name,
             email: response.email,
           },
-          isAuthenticated: true,
         });
       },
 
       clearAuth: () => {
-        set({
-          token: null,
-          user: null,
-          isAuthenticated: false,
-        });
+        set({ token: null, user: null });
       },
 
       setUser: (user) => {
@@ -44,7 +43,8 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: STORAGE_KEYS.AUTH_TOKEN,
+      name: STORAGE_KEYS.AUTH_STORE,
+      partialize: (state) => ({ token: state.token, user: state.user }),
     }
   )
 );

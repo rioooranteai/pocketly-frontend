@@ -1,5 +1,5 @@
 import { Wallet } from "lucide-react";
-import { AuthVisualPanel } from "./auth-visual-panel";
+import { AuthVisualPanel } from "@/features/auth/components/auth-visual-panel";
 
 export default function AuthLayout({
   children,

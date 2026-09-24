@@ -1,6 +1,6 @@
 # Pocketly Frontend - Architecture & Development Guide
 
-**Last Updated:** 2025-09-23
+**Last Updated:** 2026-09-24
 
 ## 📋 Project Overview
 
@@ -27,64 +27,56 @@
 src/
 ├── app/                          # Next.js App Router (routing only)
 │   ├── layout.tsx                # Root layout with providers
-│   ├── page.tsx                  # Home/landing page
-│   ├── globals.css               # Global Tailwind styles
-│   ├── providers.tsx             # QueryClientProvider wrapper
-│   ├── (auth)/                   # Route group for public pages
-│   │   ├── login/page.tsx
-│   │   └── register/page.tsx
-│   └── dashboard/                # Protected routes
+│   ├── page.tsx                  # Redirects to /login
+│   ├── globals.css               # Design tokens + global styles
+│   ├── providers.tsx             # QueryClientProvider (getQueryClient)
+│   ├── (auth)/                   # Public pages: login, register
+│   │   └── layout.tsx
+│   └── (app)/                    # Protected pages (AuthGuard + Sidebar)
 │       ├── layout.tsx
-│       └── page.tsx
+│       ├── dashboard/page.tsx
+│       └── transactions/page.tsx
 │
 ├── components/
-│   ├── ui/                       # Base UI components (shadcn/ui)
-│   │   ├── button.tsx
+│   ├── ui/                       # Base UI primitives (shadcn/ui style)
+│   │   ├── button.tsx            # Variants: default, primary, destructive, …
 │   │   ├── input.tsx
-│   │   ├── card.tsx
-│   │   ├── dialog.tsx
-│   │   └── ...
-│   └── shared/                   # Composite components
-│       ├── navbar.tsx
+│   │   ├── label.tsx
+│   │   └── dialog.tsx
+│   └── shared/                   # App-wide composite components
+│       ├── auth-guard.tsx
+│       ├── confirm-dialog.tsx
 │       ├── sidebar.tsx
-│       └── ...
+│       └── sidebar-nav-item.tsx
 │
 ├── features/                     # Feature-based organization
 │   ├── auth/
-│   │   ├── components/           # Login/Register forms
-│   │   ├── hooks/                # useLogin, useRegister, useAuth
-│   │   ├── api.ts                # Auth API calls
-│   │   └── types.ts              # Auth-specific types
-│   ├── transactions/
-│   │   ├── components/           # Transaction list, detail, form
-│   │   ├── hooks/                # useCreateTransaction, useTransactions
-│   │   ├── api.ts                # Transaction API calls
-│   │   └── types.ts
-│   ├── dashboard/
-│   │   ├── components/           # Dashboard widgets, charts
-│   │   ├── hooks/                # useDashboardData
+│   │   ├── components/           # Login/Register forms, auth visual panel
+│   │   ├── hooks/                # useLogin, useRegister, useLogout
 │   │   └── api.ts
-│   └── chatbot/
-│       ├── components/           # Chat UI
-│       ├── hooks/                # useChat
-│       └── api.ts
-│
-├── hooks/                        # Global hooks (not tied to features)
-│   ├── use-debounce.ts
-│   ├── use-local-storage.ts
-│   └── use-media-query.ts
+│   ├── transactions/
+│   │   ├── components/           # List, add-transaction modal + steps, form
+│   │   ├── hooks/                # Queries/mutations, useReceiptFile
+│   │   ├── api.ts
+│   │   ├── query-keys.ts         # transactionKeys factory
+│   │   ├── types.ts              # Form-side types
+│   │   └── utils.ts              # Form <-> API payload mapping
+│   └── dashboard/
+│       ├── components/           # Summary cards
+│       └── utils.ts              # summarizeMonth
 │
 ├── lib/                          # Utilities & configuration
-│   ├── api-client.ts             # HTTP client wrapper
-│   ├── query-client.ts           # React Query configuration
-│   ├── utils.ts                  # Helper functions (cn, format*)
+│   ├── api-client.ts             # HTTP client, ApiError, getErrorMessage
+│   ├── query-client.ts           # getQueryClient (per-request on server)
+│   ├── utils.ts                  # cn, format*, toDateInputValue
 │   └── constants.ts              # Routes, storage keys, validation
 │
-├── types/                        # Global type definitions
+├── types/
 │   └── api.ts                    # Backend DTOs & API types
 │
 └── stores/                       # Zustand stores (client state)
-    └── auth.ts                   # User auth state
+    ├── auth.ts                   # Token + user (persisted: pocketly_auth)
+    └── ui-store.ts               # Sidebar collapse (persisted: pocketly_ui)
 ```
 
 ---
@@ -139,9 +131,9 @@ TransactionItem {
 
 **Auth Flow:**
 - Response: `{name, email, token}`
-- Token stored in localStorage (key: `pocketly_token`)
+- Token held in the Zustand auth store, persisted to localStorage (key: `pocketly_auth`)
 - Sent via `Authorization: Bearer <token>` header
-- No refresh token — login again when expired (401)
+- No refresh token — on a 401 `apiClient` clears the session + query cache and AuthGuard sends the user to /login
 
 ---
 
@@ -160,15 +152,18 @@ TransactionItem {
 ### 3. **API Queries & Mutations**
 - Use **TanStack Query** for server state (fetching, caching, syncing)
 - Create `hooks/` in each feature folder for queries/mutations
+- Build query keys with a per-feature factory (`query-keys.ts`), never inline arrays
+- Pass TanStack Query's `signal` through so requests cancel on unmount
 - Example:
   ```tsx
-  export const useTransactions = () => {
+  export function useTransactions() {
     return useQuery({
-      queryKey: ["transactions"],
-      queryFn: () => apiClient.get("/transactions"),
+      queryKey: transactionKeys.lists(),
+      queryFn: ({ signal }) => transactionsApi.list(signal),
     });
-  };
+  }
   ```
+- Show API errors with `getErrorMessage(error, fallback)` from `@/lib/api-client`
 
 ### 4. **State Management**
 - **TanStack Query**: Server state (data from API, caching, refetch)

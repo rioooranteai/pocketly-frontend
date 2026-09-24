@@ -49,6 +49,8 @@ const twMerge = extendTailwindMerge({
         "sidebar-accent-foreground",
         "sidebar-border",
         "sidebar-ring",
+        "btn-dark",
+        "btn-dark-hover",
       ],
     },
   },
@@ -101,6 +103,18 @@ export function formatDateTime(date: Date | string): string {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+/**
+ * Format a date as `yyyy-mm-dd` in the user's LOCAL timezone, for
+ * `<input type="date">`. Not `toISOString().slice(0, 10)` — that's UTC,
+ * which in WIB (UTC+7) gives yesterday's date before 07:00.
+ */
+export function toDateInputValue(date: Date = new Date()): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
 }
 
 /**

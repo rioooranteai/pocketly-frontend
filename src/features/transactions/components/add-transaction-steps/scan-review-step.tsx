@@ -5,11 +5,14 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { ApiError } from "@/lib/api-client";
+import { getErrorMessage } from "@/lib/api-client";
 import type { TransactionResponse } from "@/types/api";
 import { useUpdateTransaction } from "@/features/transactions/hooks";
 import { TransactionFieldsForm } from "@/features/transactions/components/transaction-fields-form";
-import { toTransactionPayload } from "@/features/transactions/utils";
+import {
+  toTransactionFieldsValue,
+  toTransactionPayload,
+} from "@/features/transactions/utils";
 
 interface ScanReviewStepProps {
   transaction: TransactionResponse;
@@ -32,15 +35,7 @@ export function ScanReviewStep({ transaction, onSaved }: ScanReviewStepProps) {
         </DialogDescription>
       </DialogHeader>
       <TransactionFieldsForm
-        initialValues={{
-          description: transaction.description,
-          date: transaction.date.slice(0, 10),
-          items: transaction.items.map((item) => ({
-            name: item.name,
-            quantity: String(item.quantity),
-            price: String(item.price),
-          })),
-        }}
+        initialValues={toTransactionFieldsValue(transaction)}
         onSubmit={(value) =>
           updateTransaction.mutate(
             { id: transaction.id, data: toTransactionPayload(value) },
@@ -51,9 +46,7 @@ export function ScanReviewStep({ transaction, onSaved }: ScanReviewStepProps) {
         submitLabel="Simpan Perubahan"
         errorMessage={
           updateTransaction.isError
-            ? updateTransaction.error instanceof ApiError
-              ? updateTransaction.error.message
-              : "Gagal menyimpan perubahan."
+            ? getErrorMessage(updateTransaction.error, "Gagal menyimpan perubahan.")
             : null
         }
       />

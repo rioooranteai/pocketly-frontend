@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import type { ReceiptFile } from "@/features/transactions/hooks/use-receipt-file";
 import { BackButton } from "@/features/transactions/components/add-transaction-steps/back-button";
 
@@ -74,18 +74,17 @@ export function ScanUploadStep({ receipt, onBack, onSubmit }: ScanUploadStepProp
 
       {error && <p className="mt-3 text-sm text-expense">{error}</p>}
 
-      <button
+      <Button
         type="button"
+        variant="primary"
+        size="lg"
         onClick={onSubmit}
         disabled={!file}
-        className={cn(
-          "mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3 text-sm font-medium text-primary-foreground transition-colors",
-          "hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
-        )}
+        className="mt-5 w-full gap-2 rounded-full"
       >
         Scan Sekarang
         <ArrowRight size={16} />
-      </button>
+      </Button>
     </>
   );
 }

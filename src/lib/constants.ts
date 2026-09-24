@@ -1,7 +1,9 @@
+import { env } from "@/lib/env";
+
 /**
  * API Configuration
  */
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+export const API_BASE_URL = env.NEXT_PUBLIC_API_BASE_URL;
 export const API_TIMEOUT = 30000; // 30 seconds
 
 /**
@@ -28,8 +30,9 @@ export const ROUTES = {
  * Storage Keys
  */
 export const STORAGE_KEYS = {
-  AUTH_TOKEN: "pocketly_token",
-  USER_DATA: "pocketly_user",
+  AUTH_STORE: "pocketly_auth",
+  // Old key where the whole auth store used to live — removed on startup.
+  LEGACY_AUTH_TOKEN: "pocketly_token",
 } as const;
 
 /**

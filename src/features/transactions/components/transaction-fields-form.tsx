@@ -1,25 +1,19 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { useId, useState, type FormEvent } from "react";
+import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatCurrency, cn } from "@/lib/utils";
-
-export interface ItemRow {
-  name: string;
-  quantity: string;
-  price: string;
-}
-
-export interface TransactionFieldsValue {
-  description: string;
-  date: string; // yyyy-mm-dd
-  items: ItemRow[];
-}
-
-const EMPTY_ITEM: ItemRow = { name: "", quantity: "1", price: "" };
+import { Label } from "@/components/ui/label";
+import { formatCurrency, toDateInputValue } from "@/lib/utils";
+import type {
+  ItemRow,
+  TransactionFieldsValue,
+} from "@/features/transactions/types";
+import { TransactionItemRow } from "@/features/transactions/components/transaction-item-row";
+import { transactionFieldsSchema } from "@/features/transactions/schemas";
+import { createItemRow } from "@/features/transactions/utils";
 
 interface TransactionFieldsFormProps {
   initialValues?: TransactionFieldsValue;
@@ -47,14 +41,15 @@ export function TransactionFieldsForm({
     initialValues?.description ?? ""
   );
   const [date, setDate] = useState(
-    initialValues?.date ?? new Date().toISOString().slice(0, 10)
+    initialValues?.date ?? toDateInputValue()
   );
   const [items, setItems] = useState<ItemRow[]>(
     initialValues?.items && initialValues.items.length > 0
       ? initialValues.items
-      : [{ ...EMPTY_ITEM }]
+      : [createItemRow()]
   );
   const [formError, setFormError] = useState<string | null>(null);
+  const fieldId = useId();
 
   const total = items.reduce((sum, item) => {
     const qty = Number(item.quantity) || 0;
@@ -69,7 +64,7 @@ export function TransactionFieldsForm({
   }
 
   function addItem() {
-    setItems((prev) => [...prev, { ...EMPTY_ITEM }]);
+    setItems((prev) => [...prev, createItemRow()]);
   }
 
   function removeItem(index: number) {
@@ -80,18 +75,18 @@ export function TransactionFieldsForm({
     e.preventDefault();
     setFormError(null);
 
-    if (!description.trim()) {
-      setFormError("Deskripsi wajib diisi.");
+    const result = transactionFieldsSchema.safeParse({
+      description,
+      date,
+      items,
+    });
+    if (!result.success) {
+      // One message at a time, in field order — the form has a single error slot.
+      setFormError(result.error.issues[0]?.message ?? "Data tidak valid.");
       return;
     }
-    for (const item of items) {
-      if (!item.name.trim() || !item.quantity || !item.price) {
-        setFormError("Semua field item (nama, jumlah, harga) wajib diisi.");
-        return;
-      }
-    }
 
-    onSubmit({ description: description.trim(), date, items });
+    onSubmit(result.data);
   }
 
   const errorMessage = formError ?? externalError ?? null;
@@ -100,20 +95,28 @@ export function TransactionFieldsForm({
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">
+          <Label
+            htmlFor={`${fieldId}-description`}
+            className="text-xs text-muted-foreground"
+          >
             Deskripsi
-          </label>
+          </Label>
           <Input
+            id={`${fieldId}-description`}
             placeholder="Contoh: Belanja bulanan"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
         </div>
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">
+          <Label
+            htmlFor={`${fieldId}-date`}
+            className="text-xs text-muted-foreground"
+          >
             Tanggal
-          </label>
+          </Label>
           <Input
+            id={`${fieldId}-date`}
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
@@ -123,9 +126,7 @@ export function TransactionFieldsForm({
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-medium text-muted-foreground">
-            Item
-          </label>
+          <p className="text-xs font-medium text-muted-foreground">Item</p>
           <button
             type="button"
             onClick={addItem}
@@ -138,44 +139,13 @@ export function TransactionFieldsForm({
 
         <div className="space-y-2">
           {items.map((item, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <Input
-                placeholder="Nama item"
-                value={item.name}
-                onChange={(e) => updateItem(index, { name: e.target.value })}
-                className="flex-1"
-              />
-              <Input
-                type="number"
-                min={1}
-                placeholder="Qty"
-                value={item.quantity}
-                onChange={(e) =>
-                  updateItem(index, { quantity: e.target.value })
-                }
-                className="w-20"
-              />
-              <Input
-                type="number"
-                min={0}
-                placeholder="Harga"
-                value={item.price}
-                onChange={(e) => updateItem(index, { price: e.target.value })}
-                className="w-32"
-              />
-              <button
-                type="button"
-                onClick={() => removeItem(index)}
-                disabled={items.length === 1}
-                className={cn(
-                  "flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors",
-                  "hover:bg-destructive/10 hover:text-destructive disabled:opacity-30 disabled:hover:bg-transparent"
-                )}
-                aria-label="Hapus item"
-              >
-                <Trash2 size={15} />
-              </button>
-            </div>
+            <TransactionItemRow
+              key={item.id}
+              item={item}
+              onChange={(patch) => updateItem(index, patch)}
+              onRemove={() => removeItem(index)}
+              canRemove={items.length > 1}
+            />
           ))}
         </div>
       </div>
@@ -189,11 +159,16 @@ export function TransactionFieldsForm({
         </span>
       </div>
 
-      {errorMessage && <p className="text-sm text-expense">{errorMessage}</p>}
+      {errorMessage && (
+        <p role="alert" className="text-sm text-expense">
+          {errorMessage}
+        </p>
+      )}
 
       <Button
         type="submit"
-        className="w-full bg-primary text-primary-foreground hover:bg-primary-hover"
+        variant="primary"
+        className="w-full"
         disabled={isSubmitting}
       >
         {isSubmitting ? "Menyimpan..." : submitLabel}
