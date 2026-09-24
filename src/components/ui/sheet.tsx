@@ -24,12 +24,14 @@ const SheetContent = React.forwardRef<
   }
 >(({ className, children, side = "right", showClose = true, ...props }, ref) => (
   <DialogPrimitive.Portal>
-    <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-foreground/35" />
+    <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-foreground/35 data-[state=open]:animate-overlay-in data-[state=closed]:animate-overlay-out motion-reduce:animate-none" />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-y-4 z-50 flex w-[calc(100%-2rem)] flex-col overflow-hidden rounded-3xl bg-card shadow-xl focus:outline-none",
-        side === "right" ? "right-4 max-w-[480px]" : "left-4 max-w-[300px]",
+        "fixed inset-y-4 z-50 flex w-[calc(100%-2rem)] flex-col overflow-hidden rounded-3xl bg-card shadow-xl focus:outline-none motion-reduce:animate-none",
+        side === "right"
+          ? "right-4 max-w-[480px] data-[state=open]:animate-sheet-in-right data-[state=closed]:animate-sheet-out-right"
+          : "left-4 max-w-[300px] data-[state=open]:animate-sheet-in-left data-[state=closed]:animate-sheet-out-left",
         className
       )}
       {...props}

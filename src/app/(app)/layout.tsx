@@ -14,7 +14,7 @@ export default function AppLayout({
         <Sidebar className="hidden lg:block" />
         {/* min-w-0: a flex child otherwise grows to its content's width,
             which is what pushes the page into horizontal scrolling. */}
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">{children}</main>
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto scrollbar-none">{children}</main>
       </div>
     </AuthGuard>
   );

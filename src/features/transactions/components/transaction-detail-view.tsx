@@ -57,7 +57,7 @@ export function TransactionDetailView({
         </dl>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-7 py-5">
+      <div className="min-h-0 flex-1 overflow-y-auto scrollbar-none px-7 py-5">
         <TransactionItemsTable items={tx.items} total={tx.total_amount} />
       </div>
 

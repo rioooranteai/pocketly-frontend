@@ -21,7 +21,12 @@ import {
   toTransactionPayload,
 } from "@/features/transactions/utils";
 import { getErrorMessage } from "@/lib/api-client";
+import { cn } from "@/lib/utils";
 import type { TransactionResponse } from "@/types/api";
+
+/** Fades the body up just after the panel starts sliding in (and on view/edit swaps). */
+const CONTENT_ANIMATION =
+  "flex min-h-0 flex-1 flex-col animate-content-in [animation-delay:80ms] motion-reduce:animate-none";
 
 interface TransactionDetailSheetProps {
   transaction: TransactionResponse | null;
@@ -40,6 +45,10 @@ export function TransactionDetailSheet({
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const updateTransaction = useUpdateTransaction();
   const deleteTransaction = useDeleteTransaction();
+  // Keep the last transaction on screen while the sheet animates out —
+  // `transaction` turns null the moment it closes.
+  const [shown, setShown] = useState(transaction);
+  if (transaction && transaction !== shown) setShown(transaction);
 
   function handleOpenChange(open: boolean) {
     if (open || updateTransaction.isPending) return;
@@ -63,27 +72,32 @@ export function TransactionDetailSheet({
     <>
       <Sheet open={transaction !== null} onOpenChange={handleOpenChange}>
         <SheetContent aria-describedby={undefined}>
-          {transaction && mode === "view" && (
-            <TransactionDetailView
-              transaction={transaction}
-              onEdit={() => setMode("edit")}
-              onDelete={() => {
-                deleteTransaction.reset();
-                setConfirmingDelete(true);
-              }}
-            />
+          {shown && mode === "view" && (
+            <div key="view" className={CONTENT_ANIMATION}>
+              <TransactionDetailView
+                transaction={shown}
+                onEdit={() => setMode("edit")}
+                onDelete={() => {
+                  deleteTransaction.reset();
+                  setConfirmingDelete(true);
+                }}
+              />
+            </div>
           )}
-          {transaction && mode === "edit" && (
-            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-7 pb-6 pt-6">
+          {shown && mode === "edit" && (
+            <div
+              key="edit"
+              className={cn(CONTENT_ANIMATION, "overflow-y-auto scrollbar-none px-7 pb-6 pt-6")}
+            >
               <SheetTitle className="text-lg font-semibold">Edit transaksi</SheetTitle>
               <SheetDescription className="mb-5 mt-1 text-sm text-muted-foreground">
                 Total dihitung ulang otomatis dari item.
               </SheetDescription>
               <TransactionFieldsForm
-                initialValues={toTransactionFieldsValue(transaction)}
+                initialValues={toTransactionFieldsValue(shown)}
                 onSubmit={(value) =>
                   updateTransaction.mutate(
-                    { id: transaction.id, data: toTransactionPayload(value) },
+                    { id: shown.id, data: toTransactionPayload(value) },
                     {
                       onSuccess: () => {
                         toast.success("Perubahan disimpan.");
@@ -113,7 +127,7 @@ export function TransactionDetailSheet({
         open={confirmingDelete}
         onOpenChange={setConfirmingDelete}
         title="Hapus transaksi?"
-        description={`"${transaction?.description ?? ""}" akan dihapus permanen.`}
+        description={`"${shown?.description ?? ""}" akan dihapus permanen.`}
         confirmLabel="Hapus"
         onConfirm={handleDelete}
         isPending={deleteTransaction.isPending}

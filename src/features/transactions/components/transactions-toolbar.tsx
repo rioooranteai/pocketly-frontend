@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 
 import {
   CATEGORY_META,
@@ -18,8 +18,6 @@ import type { Category } from "@/types/api";
 interface TransactionsToolbarProps {
   month: Date;
   onMonthChange: (month: Date) => void;
-  search: string;
-  onSearchChange: (search: string) => void;
   category: CategoryFilter;
   onCategoryChange: (category: CategoryFilter) => void;
 }
@@ -36,54 +34,39 @@ const pillActive = "bg-foreground text-background";
 export function TransactionsToolbar({
   month,
   onMonthChange,
-  search,
-  onSearchChange,
   category,
   onCategoryChange,
 }: TransactionsToolbarProps) {
   const secondaryActive = SECONDARY_CATEGORIES.includes(category as Category);
 
   return (
-    <div className="flex min-w-0 flex-col gap-3">
-      <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="flex shrink-0 items-center justify-between gap-0.5 rounded-full border border-border bg-card p-1">
-          <MonthButton
-            label="Bulan sebelumnya"
-            onClick={() => onMonthChange(addMonths(month, -1))}
-          >
-            <ChevronLeft size={18} />
-          </MonthButton>
-          <span
-            aria-live="polite"
-            className="min-w-[124px] px-2 text-center text-sm font-semibold capitalize"
-          >
-            {formatMonthLabel(month)}
-          </span>
-          <MonthButton
-            label="Bulan berikutnya"
-            onClick={() => onMonthChange(addMonths(month, 1))}
-          >
-            <ChevronRight size={18} />
-          </MonthButton>
-        </div>
-
-        <label className="flex h-[46px] min-w-0 flex-1 items-center gap-2.5 rounded-full border border-border bg-card px-[18px] text-muted-foreground focus-within:ring-2 focus-within:ring-ring">
-          <Search size={17} aria-hidden="true" />
-          <span className="sr-only">Cari transaksi</span>
-          <input
-            type="search"
-            value={search}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Cari deskripsi atau item…"
-            className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-          />
-        </label>
+    <div className="flex min-w-0 items-center gap-3">
+      <div className="flex shrink-0 items-center gap-0.5 rounded-full border border-border bg-card p-1">
+        <MonthButton
+          label="Bulan sebelumnya"
+          onClick={() => onMonthChange(addMonths(month, -1))}
+        >
+          <ChevronLeft size={18} />
+        </MonthButton>
+        <span
+          aria-live="polite"
+          className="min-w-[124px] px-2 text-center text-sm font-semibold capitalize"
+        >
+          {formatMonthLabel(month)}
+        </span>
+        <MonthButton
+          label="Bulan berikutnya"
+          onClick={() => onMonthChange(addMonths(month, 1))}
+        >
+          <ChevronRight size={18} />
+        </MonthButton>
       </div>
 
+      {/* Chips scroll sideways when the row is too narrow to fit them all. */}
       <div
         role="group"
         aria-label="Filter kategori"
-        className="flex min-w-0 gap-1.5 overflow-x-auto pb-1"
+        className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto scrollbar-none"
       >
         <FilterChip
           active={category === "all"}

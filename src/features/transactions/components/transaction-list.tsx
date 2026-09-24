@@ -60,7 +60,7 @@ export function TransactionList({
   return (
     <section
       aria-label="Daftar transaksi"
-      className="flex min-h-[320px] flex-col overflow-hidden rounded-[20px] bg-card"
+      className="flex min-h-[320px] flex-col"
     >
       {isLoading ? (
         <ListSkeleton />
@@ -107,10 +107,10 @@ export function TransactionList({
           </ListMessage>
         )
       ) : (
-        <div className="pb-2">
+        <div className="pb-3">
           {groups.map((group, i) => (
             <Fragment key={group.key}>
-              {i > 0 && <div className="mx-4 mt-1.5 h-px bg-border md:mx-6" />}
+              {i > 0 && <div className="mx-4 mt-1.5 h-px bg-foreground/10 md:mx-6" />}
               <h2 className="flex justify-between px-4 pb-1.5 pt-3.5 text-xs font-semibold tracking-wide text-muted-foreground md:px-6">
                 <span>{group.label}</span>
                 <span className="tabular-nums">{formatCurrency(group.total)}</span>
@@ -124,7 +124,7 @@ export function TransactionList({
               </ul>
             </Fragment>
           ))}
-          <div className="mt-2 flex flex-col items-center gap-2 border-t border-border px-4 pt-3 sm:flex-row sm:justify-between md:px-6">
+          <div className="mt-2 flex flex-col items-center gap-2 border-t border-foreground/10 px-4 pt-3 sm:flex-row sm:justify-between md:px-6">
             <p className="text-xs tabular-nums text-muted-foreground">
               Menampilkan {pagination.from}–{pagination.to} dari {pagination.total}{" "}
               transaksi
@@ -154,7 +154,7 @@ function TransactionRow({
     <button
       type="button"
       onClick={() => onSelect(tx)}
-      className="flex w-full items-center gap-3.5 px-4 py-2.5 text-left transition-colors hover:bg-background/60 focus-visible:bg-background/60 focus-visible:outline-none md:px-6"
+      className="flex w-full items-center gap-3.5 px-4 py-2.5 text-left transition-colors hover:bg-card/70 focus-visible:bg-card/70 focus-visible:outline-none md:px-6"
     >
       <CategoryTile category={tx.category} />
       <div className="min-w-0 flex-1">
