@@ -90,25 +90,44 @@ export interface DayGroup {
   transactions: TransactionResponse[];
 }
 
-/** Groups already-sorted transactions by local calendar day, keeping order. */
+/**
+ * Groups already-sorted transactions by local calendar day, keeping order.
+ * `totalsFrom`: where day subtotals come from — pass the full filtered list
+ * when grouping one page, so a day split across pages still shows its
+ * whole-day total instead of just this page's share.
+ */
 export function groupByDay(
   transactions: TransactionResponse[],
-  now: Date = new Date()
+  now: Date = new Date(),
+  totalsFrom: TransactionResponse[] = transactions
 ): DayGroup[] {
+  const dayTotals = new Map<string, number>();
+  for (const tx of totalsFrom) {
+    const key = toDateInputValue(new Date(tx.date));
+    dayTotals.set(key, (dayTotals.get(key) ?? 0) + tx.total_amount);
+  }
+
   const groups: DayGroup[] = [];
   for (const tx of transactions) {
     const date = new Date(tx.date);
     const key = toDateInputValue(date);
     let group = groups.at(-1);
     if (!group || group.key !== key) {
-      group = { key, label: formatDayLabel(date, now), total: 0, transactions: [] };
+      group = {
+        key,
+        label: formatDayLabel(date, now),
+        total: dayTotals.get(key) ?? 0,
+        transactions: [],
+      };
       groups.push(group);
     }
-    group.total += tx.total_amount;
     group.transactions.push(tx);
   }
   return groups;
 }
+
+/** Transactions per page on the list. */
+export const TRANSACTIONS_PAGE_SIZE = 10;
 
 export interface CategorySlice {
   key: string;

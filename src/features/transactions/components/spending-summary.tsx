@@ -32,9 +32,9 @@ export function SpendingSummary({
   return (
     <section
       aria-label={`Ringkasan ${monthLabel}`}
-      className="flex flex-col gap-5 rounded-[20px] bg-card p-5 md:flex-row md:items-center md:gap-10 md:px-6 md:py-[22px]"
+      className="flex min-w-0 flex-col gap-5 rounded-[20px] bg-card p-5 xl:flex-row xl:items-center xl:gap-10 xl:px-6 xl:py-[22px]"
     >
-      <div className="shrink-0 md:w-[250px]">
+      <div className="shrink-0 xl:w-[250px]">
         <p className="text-xs text-muted-foreground">
           Total pengeluaran <span className="capitalize">{monthLabel}</span>
           {isFiltered && " · sesuai filter"}
@@ -53,7 +53,7 @@ export function SpendingSummary({
       </div>
 
       {summary.slices.length > 0 && (
-        <div className="flex flex-1 flex-col gap-3.5">
+        <div className="flex min-w-0 flex-1 flex-col gap-3.5">
           <div
             role="img"
             aria-label="Porsi pengeluaran per kategori"
@@ -71,8 +71,8 @@ export function SpendingSummary({
           </div>
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
             {summary.slices.map((slice, i) => (
-              <li key={slice.key} className="flex flex-col gap-0.5">
-                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <li key={slice.key} className="flex min-w-0 flex-col gap-0.5">
+                <span className="flex min-w-0 items-center gap-1.5 truncate text-xs text-muted-foreground">
                   <span
                     aria-hidden="true"
                     className={cn("h-2 w-2 shrink-0 rounded-full", SLICE_COLORS[i])}

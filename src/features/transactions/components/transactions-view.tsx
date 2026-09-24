@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Camera, Plus } from "lucide-react";
 
@@ -20,9 +20,11 @@ import {
   groupByDay,
   startOfMonth,
   summarizeSpending,
+  TRANSACTIONS_PAGE_SIZE,
   type CategoryFilter,
 } from "@/features/transactions/list-utils";
 import { ROUTES } from "@/lib/constants";
+import { paginate } from "@/lib/pagination";
 
 interface TransactionsViewProps {
   /** Opens the add modal on arrival (e.g. sidebar "Scan Receipt" → ?add=scan). */
@@ -36,6 +38,8 @@ export function TransactionsView({ initialAdd }: TransactionsViewProps) {
   const [month, setMonth] = useState(() => startOfMonth(new Date()));
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<CategoryFilter>("all");
+  const [page, setPage] = useState(1);
+  const listTopRef = useRef<HTMLDivElement>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [addStart, setAddStart] = useState<AddTransactionStart | null>(
     initialAdd ?? null
@@ -44,9 +48,24 @@ export function TransactionsView({ initialAdd }: TransactionsViewProps) {
   const isFiltered = search.trim() !== "" || category !== "all";
   const visible = filterTransactions(data ?? [], { month, search, category });
   const summary = summarizeSpending(visible);
-  const groups = groupByDay(visible);
+  // paginate() clamps the page, e.g. after deleting a page's last row.
+  const pageSlice = paginate(visible, page, TRANSACTIONS_PAGE_SIZE);
+  const groups = groupByDay(pageSlice.items, new Date(), visible);
   // Read from the query cache so edits/deletes refresh the open sheet.
   const selected = data?.find((tx) => tx.id === selectedId) ?? null;
+
+  // Any filter change starts over at page 1.
+  function withPageReset<T>(setter: (value: T) => void) {
+    return (value: T) => {
+      setter(value);
+      setPage(1);
+    };
+  }
+
+  function changePage(next: number) {
+    setPage(next);
+    listTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   function closeAddModal() {
     setAddStart(null);
@@ -55,17 +74,17 @@ export function TransactionsView({ initialAdd }: TransactionsViewProps) {
   }
 
   return (
-    <div className="space-y-5 pb-24 md:pb-4">
-      <div className="flex items-end justify-between gap-4 md:px-2 md:pt-2">
+    <div className="min-w-0 space-y-5 pb-24 lg:pb-4">
+      <div className="flex items-end justify-between gap-4 lg:px-2 lg:pt-2">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground md:text-[28px]">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground lg:text-[28px]">
             Transaksi
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Semua pengeluaran yang sudah kamu catat.
           </p>
         </div>
-        <div className="hidden gap-2 md:flex">
+        <div className="hidden shrink-0 gap-2 lg:flex">
           <Button
             variant="outline"
             size="lg"
@@ -88,11 +107,11 @@ export function TransactionsView({ initialAdd }: TransactionsViewProps) {
 
       <TransactionsToolbar
         month={month}
-        onMonthChange={setMonth}
+        onMonthChange={withPageReset(setMonth)}
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={withPageReset(setSearch)}
         category={category}
-        onCategoryChange={setCategory}
+        onCategoryChange={withPageReset(setCategory)}
       />
 
       <SpendingSummary
@@ -102,6 +121,8 @@ export function TransactionsView({ initialAdd }: TransactionsViewProps) {
         isFiltered={isFiltered}
       />
 
+      {/* scroll-mt: lands just above the list, not flush against the edge. */}
+      <div ref={listTopRef} className="scroll-mt-4" />
       <TransactionList
         groups={groups}
         isLoading={isLoading}
@@ -111,11 +132,12 @@ export function TransactionsView({ initialAdd }: TransactionsViewProps) {
         onAdd={setAddStart}
         monthLabel={formatMonthLabel(month)}
         isFiltered={isFiltered}
+        pagination={{ ...pageSlice, onPageChange: changePage }}
       />
 
       {/* Mobile: one FAB → method picker (desktop has both CTAs in the header). */}
       <Button
-        className="fixed bottom-6 right-4 z-40 h-14 gap-2 rounded-full px-6 text-[15px] font-semibold shadow-lg md:hidden"
+        className="fixed bottom-6 right-4 z-40 h-14 gap-2 rounded-full px-6 text-[15px] font-semibold shadow-lg lg:hidden"
         onClick={() => setAddStart("choose")}
       >
         <Plus size={18} />

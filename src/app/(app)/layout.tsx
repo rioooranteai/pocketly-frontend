@@ -9,10 +9,12 @@ export default function AppLayout({
 }) {
   return (
     <AuthGuard>
-      <div className="flex h-dvh flex-col gap-4 bg-background p-4 md:flex-row">
-        <MobileNav className="md:hidden" />
-        <Sidebar className="hidden md:block" />
-        <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
+      <div className="flex h-dvh flex-col gap-4 bg-background p-4 lg:flex-row">
+        <MobileNav className="lg:hidden" />
+        <Sidebar className="hidden lg:block" />
+        {/* min-w-0: a flex child otherwise grows to its content's width,
+            which is what pushes the page into horizontal scrolling. */}
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">{children}</main>
       </div>
     </AuthGuard>
   );

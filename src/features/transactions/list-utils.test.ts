@@ -95,6 +95,16 @@ describe("groupByDay", () => {
     expect(groups[0].total).toBe(86500 + 38000);
     expect(groups[0].transactions.map((t) => t.id)).toEqual(["c", "a"]);
   });
+
+  it("keeps the whole-day subtotal when a day is split across pages", () => {
+    const sorted = filterTransactions(data, { month: SEPT, search: "", category: "all" });
+    // Page holding only the first of today's two transactions.
+    const groups = groupByDay(sorted.slice(0, 1), NOW, sorted);
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0].transactions).toHaveLength(1);
+    expect(groups[0].total).toBe(86500 + 38000);
+  });
 });
 
 describe("summarizeSpending", () => {

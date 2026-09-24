@@ -19,13 +19,13 @@ export function TransactionItemRow({
   canRemove,
 }: TransactionItemRowProps) {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex min-w-0 items-center gap-2">
       <Input
         placeholder="Nama item"
         aria-label="Nama item"
         value={item.name}
         onChange={(e) => onChange({ name: e.target.value })}
-        className="flex-1"
+        className="min-w-0 flex-1 px-4"
       />
       <Input
         type="number"
@@ -35,7 +35,7 @@ export function TransactionItemRow({
         aria-label="Jumlah"
         value={item.quantity}
         onChange={(e) => onChange({ quantity: e.target.value })}
-        className="w-20"
+        className="w-16 shrink-0 px-3 text-center sm:w-20"
       />
       <Input
         type="number"
@@ -44,7 +44,7 @@ export function TransactionItemRow({
         aria-label="Harga"
         value={item.price}
         onChange={(e) => onChange({ price: e.target.value })}
-        className="w-32"
+        className="w-24 shrink-0 px-3 text-right sm:w-32"
       />
       <button
         type="button"

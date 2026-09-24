@@ -44,44 +44,46 @@ export function TransactionsToolbar({
   const secondaryActive = SECONDARY_CATEGORIES.includes(category as Category);
 
   return (
-    <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-      <div className="flex shrink-0 items-center justify-between gap-0.5 rounded-full border border-border bg-card p-1">
-        <MonthButton
-          label="Bulan sebelumnya"
-          onClick={() => onMonthChange(addMonths(month, -1))}
-        >
-          <ChevronLeft size={18} />
-        </MonthButton>
-        <span
-          aria-live="polite"
-          className="min-w-[124px] px-2 text-center text-sm font-semibold capitalize"
-        >
-          {formatMonthLabel(month)}
-        </span>
-        <MonthButton
-          label="Bulan berikutnya"
-          onClick={() => onMonthChange(addMonths(month, 1))}
-        >
-          <ChevronRight size={18} />
-        </MonthButton>
-      </div>
+    <div className="flex min-w-0 flex-col gap-3">
+      <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex shrink-0 items-center justify-between gap-0.5 rounded-full border border-border bg-card p-1">
+          <MonthButton
+            label="Bulan sebelumnya"
+            onClick={() => onMonthChange(addMonths(month, -1))}
+          >
+            <ChevronLeft size={18} />
+          </MonthButton>
+          <span
+            aria-live="polite"
+            className="min-w-[124px] px-2 text-center text-sm font-semibold capitalize"
+          >
+            {formatMonthLabel(month)}
+          </span>
+          <MonthButton
+            label="Bulan berikutnya"
+            onClick={() => onMonthChange(addMonths(month, 1))}
+          >
+            <ChevronRight size={18} />
+          </MonthButton>
+        </div>
 
-      <label className="flex h-[46px] flex-1 items-center gap-2.5 rounded-full border border-border bg-card px-[18px] text-muted-foreground focus-within:ring-2 focus-within:ring-ring">
-        <Search size={17} aria-hidden="true" />
-        <span className="sr-only">Cari transaksi</span>
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          placeholder="Cari deskripsi atau item…"
-          className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-        />
-      </label>
+        <label className="flex h-[46px] min-w-0 flex-1 items-center gap-2.5 rounded-full border border-border bg-card px-[18px] text-muted-foreground focus-within:ring-2 focus-within:ring-ring">
+          <Search size={17} aria-hidden="true" />
+          <span className="sr-only">Cari transaksi</span>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Cari deskripsi atau item…"
+            className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          />
+        </label>
+      </div>
 
       <div
         role="group"
         aria-label="Filter kategori"
-        className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1 lg:pb-0"
+        className="flex min-w-0 gap-1.5 overflow-x-auto pb-1"
       >
         <FilterChip
           active={category === "all"}

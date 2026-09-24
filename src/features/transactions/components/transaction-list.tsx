@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
 import { CategoryTile } from "@/features/transactions/components/category-badge";
 import {
   ListMessage,
@@ -34,6 +35,15 @@ interface TransactionListProps {
   monthLabel: string;
   /** Search or category filter active: empty means "no match", not "no data". */
   isFiltered: boolean;
+  /** Range + page controls shown under the rows. */
+  pagination: {
+    page: number;
+    totalPages: number;
+    from: number;
+    to: number;
+    total: number;
+    onPageChange: (page: number) => void;
+  };
 }
 
 export function TransactionList({
@@ -45,6 +55,7 @@ export function TransactionList({
   onAdd,
   monthLabel,
   isFiltered,
+  pagination,
 }: TransactionListProps) {
   return (
     <section
@@ -113,6 +124,19 @@ export function TransactionList({
               </ul>
             </Fragment>
           ))}
+          <div className="mt-2 flex flex-col items-center gap-2 border-t border-border px-4 pt-3 sm:flex-row sm:justify-between md:px-6">
+            <p className="text-xs tabular-nums text-muted-foreground">
+              Menampilkan {pagination.from}–{pagination.to} dari {pagination.total}{" "}
+              transaksi
+            </p>
+            {pagination.totalPages > 1 && (
+              <Pagination
+                page={pagination.page}
+                totalPages={pagination.totalPages}
+                onPageChange={pagination.onPageChange}
+              />
+            )}
+          </div>
         </div>
       )}
     </section>
