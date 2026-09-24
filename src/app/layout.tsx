@@ -10,7 +10,11 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Pocketly - AI Finance Tracker",
+  // Pages set just their own name, e.g. "Transaksi · Pocketly".
+  title: {
+    template: "%s · Pocketly",
+    default: "Pocketly - AI Finance Tracker",
+  },
   description: "Track your expenses with AI-powered insights",
 };
 
