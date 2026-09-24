@@ -4,5 +4,6 @@ import { afterEach } from "vitest";
 
 afterEach(() => {
   cleanup();
-  localStorage.clear();
+  // Absent in `@vitest-environment node` files.
+  globalThis.localStorage?.clear();
 });

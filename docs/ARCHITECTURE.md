@@ -77,6 +77,11 @@ src/
 │   ├── utils.ts                  # cn, format*, toDateInputValue
 │   └── constants.ts              # Routes, storage keys, validation
 │
+├── mocks/                        # Dummy API (MSW) for dev without backend
+│   ├── handlers.ts               # Mirrors the backend endpoints
+│   ├── seed.ts, db.ts            # Seed data + sessionStorage-backed store
+│   └── browser.ts
+│
 ├── types/
 │   └── api.ts                    # Backend DTOs & API types
 │
@@ -186,6 +191,17 @@ TransactionItem {
 - Use `cn()` for Tailwind class merging
 - Derive types from backend models in `types/api.ts`
 
+
+### Mode data dummy (tanpa backend)
+
+Set `NEXT_PUBLIC_API_MOCKING=enabled` di `.env.local`, lalu `npm run dev`.
+MSW mencegat request di level network, jadi kode aplikasi tidak berubah.
+Hanya aktif di development; badge "Mode data dummy" tampil di bawah layar.
+
+- Login: email/password apa saja. Password `salah` → error login.
+- Register dengan email `sudah@…` → error "Email sudah terdaftar".
+- Scan: upload gambar apa saja (±2,5 detik). Nama file berisi `gagal` → error scan.
+- Data tersimpan di sessionStorage; `pocketlyMock.reset()` di console lalu reload untuk data awal.
 
 ---
 
