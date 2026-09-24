@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Receipt,
-  Camera,
   MessageCircle,
   Settings,
   User,
@@ -25,7 +24,6 @@ import { SidebarNavItem } from "@/components/shared/sidebar-nav-item";
 const NAV_ITEMS = [
   { label: "Dashboard", href: ROUTES.DASHBOARD, icon: LayoutDashboard },
   { label: "Transactions", href: ROUTES.TRANSACTIONS.LIST, icon: Receipt },
-  { label: "Scan Receipt", href: ROUTES.TRANSACTIONS.SCAN, icon: Camera },
   {
     label: "Chatbot",
     href: ROUTES.CHATBOT,
@@ -43,8 +41,10 @@ const NAV_ITEMS = [
 
 /**
  * Sidebar — fixed dark theme regardless of app color mode.
- * Expanded: logo, centered avatar + greeting, nav with text-color active
- * state (ref: Zarss). Collapsed: narrow icon-only rail (ref: Dappr).
+ * Two-column layout (ref: Untitled UI): a narrow icon rail on the left
+ * (logo on top, avatar + logout at the bottom) and, when expanded, an
+ * inset panel with the labeled nav. Collapsed: the panel slides away and
+ * the nav icons move into the rail.
  *
  * Structure note: the toggle button lives OUTSIDE the rounded <aside>
  * (as a sibling in the relative wrapper), because the aside uses
@@ -69,87 +69,97 @@ export function Sidebar({
   const logout = useLogout();
   const pathname = usePathname();
 
+  const isActive = (href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`);
+
   return (
     <div className={cn("relative h-full shrink-0", className)}>
       <aside
         className={cn(
-          "flex h-full flex-col overflow-hidden rounded-3xl bg-sidebar text-sidebar-foreground",
-          "transition-[width] duration-300 ease-in-out",
-          isDrawer ? "w-full" : sidebarCollapsed ? "w-[76px]" : "w-[260px]"
+          "flex h-full overflow-hidden rounded-3xl bg-sidebar text-sidebar-foreground",
+          isDrawer && "w-full"
         )}
       >
-        {/* Logo — always centered, larger text */}
-        <div
-          className={cn(
-            "flex h-16 shrink-0 items-center justify-center px-4 translate-y-4",
-            !sidebarCollapsed && "gap-2.5"
-          )}
-        >
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground">
-            <Wallet size={18} />
+        {/* Icon rail */}
+        <div className="flex w-[68px] shrink-0 flex-col items-center py-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sidebar-primary text-sidebar-primary-foreground">
+            <Wallet size={19} />
           </div>
-          {!sidebarCollapsed && (
-            <span className="text-xl font-bold text-white">Pocketly</span>
-          )}
+
+          <nav
+            aria-label="Navigasi utama"
+            aria-hidden={!sidebarCollapsed || undefined}
+            className={cn(
+              "mt-6 flex flex-col items-center gap-1 transition-opacity duration-200",
+              sidebarCollapsed ? "opacity-100" : "pointer-events-none opacity-0"
+            )}
+          >
+            {sidebarCollapsed &&
+              NAV_ITEMS.map((item) => (
+                <SidebarNavItem
+                  key={item.href}
+                  {...item}
+                  variant="icon"
+                  isActive={isActive(item.href)}
+                />
+              ))}
+          </nav>
+
+          <div className="mt-auto flex flex-col items-center gap-2">
+            <button
+              onClick={logout}
+              title="Log Out"
+              aria-label="Log Out"
+              className="flex h-10 w-10 items-center justify-center rounded-lg text-sidebar-foreground transition-colors hover:bg-white/5 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+            >
+              <LogOut size={18} />
+            </button>
+            <div
+              title={user?.name}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-sm font-semibold text-white"
+            >
+              {getInitials(user?.name)}
+            </div>
+          </div>
         </div>
 
-        {/* Avatar + greeting — centered, like Zarss */}
+        {/* Inset panel — width animates to 0 when collapsed */}
         <div
+          aria-hidden={sidebarCollapsed || undefined}
           className={cn(
-            "flex shrink-0 flex-col items-center translate-y-4",
-            sidebarCollapsed ? "gap-0 pb-4" : "gap-3 px-4 pb-6 pt-1"
+            "overflow-hidden py-2 pr-2 transition-[width,opacity] duration-300 ease-in-out",
+            isDrawer
+              ? "flex-1"
+              : sidebarCollapsed
+                ? "w-0 opacity-0"
+                : "w-[212px] opacity-100"
           )}
         >
           <div
             className={cn(
-              "flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/10 font-semibold text-white",
-              sidebarCollapsed ? "h-11 w-11 text-sm" : "h-23 w-23 text-2xl"
+              "flex h-full flex-col rounded-2xl border border-sidebar-border bg-white/[0.02] px-3 py-4",
+              !isDrawer && "w-[204px]"
             )}
           >
-            {getInitials(user?.name)}
-          </div>
-          {!sidebarCollapsed && (
-            <div className="text-center translate">
-              <p className="text-xs text-sidebar-foreground/60">
-                Welcome Back,
-              </p>
-              <p className="truncate text-sm font-semibold text-white">
-                {user?.name ?? "Guest"}
-              </p>
+            <div className="px-2.5">
+              <p className="text-[25px] font-bold text-white">Pocketly</p>
             </div>
-          )}
-        </div>
 
-        {/* Nav items */}
-        <nav className="flex-1 space-y-1 px-3 mt-3">
-          {NAV_ITEMS.map((item) => (
-            <SidebarNavItem
-              key={item.href}
-              {...item}
-              collapsed={sidebarCollapsed}
-              isActive={
-                pathname === item.href || pathname.startsWith(`${item.href}/`)
-              }
-            />
-          ))}
-        </nav>
-
-        {/* Footer: logout */}
-        <div className="shrink-0 border-t border-sidebar-border p-3">
-          <button
-            onClick={logout}
-            title={sidebarCollapsed ? "Log Out" : undefined}
-            className={cn(
-              "flex w-full items-center gap-3 rounded-xl py-2 text-sm font-medium transition-colors",
-              "text-sidebar-foreground hover:text-white",
-              sidebarCollapsed ? "justify-center px-0" : "px-2"
-            )}
-          >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/5">
-              <LogOut size={17} />
-            </span>
-            {!sidebarCollapsed && <span>Log Out</span>}
-          </button>
+            <nav
+              aria-label="Navigasi utama"
+              className="mt-6 flex flex-col gap-0.5"
+            >
+              {!sidebarCollapsed &&
+                NAV_ITEMS.map((item) => (
+                  <SidebarNavItem
+                    key={item.href}
+                    {...item}
+                    variant="row"
+                    isActive={isActive(item.href)}
+                  />
+                ))}
+            </nav>
+          </div>
         </div>
       </aside>
 

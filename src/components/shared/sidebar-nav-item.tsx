@@ -8,40 +8,43 @@ interface SidebarNavItemProps {
   href: string;
   icon: LucideIcon;
   isActive: boolean;
-  collapsed: boolean;
+  /** "icon": square button in the narrow rail. "row": icon + label in the panel. */
+  variant: "icon" | "row";
   /** Page not built yet — rendered disabled instead of linking to a 404. */
   comingSoon?: boolean;
 }
 
-/** One sidebar row — active state = colored icon tile + colored text. */
+/** One sidebar entry — active state = filled accent background. */
 export function SidebarNavItem({
   label,
   href,
   icon: Icon,
   isActive,
-  collapsed,
+  variant,
   comingSoon = false,
 }: SidebarNavItemProps) {
-  const rowClassName = cn(
-    "flex items-center gap-3 rounded-xl py-2 text-sm font-medium transition-colors",
-    collapsed ? "justify-center px-0" : "px-2"
+  const isIcon = variant === "icon";
+
+  const className = cn(
+    "flex items-center rounded-lg text-sm font-medium transition-colors",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+    isIcon ? "h-10 w-10 justify-center" : "h-9 w-full gap-2.5 px-2.5",
+    isActive
+      ? "bg-sidebar-accent text-white"
+      : "text-sidebar-foreground hover:bg-white/5 hover:text-white",
+    comingSoon &&
+      "cursor-not-allowed opacity-50 hover:bg-transparent hover:text-sidebar-foreground"
   );
 
   const content = (
     <>
-      <span
-        className={cn(
-          "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors",
-          isActive
-            ? "bg-sidebar-primary/15 text-sidebar-primary"
-            : "bg-white/5 text-sidebar-foreground"
-        )}
-      >
-        <Icon size={17} />
-      </span>
-      {!collapsed && <span className="truncate">{label}</span>}
-      {!collapsed && comingSoon && (
-        <span className="ml-auto rounded-full bg-white/5 px-2 py-0.5 text-[10px]">
+      <Icon
+        size={isIcon ? 19 : 17}
+        className={cn("shrink-0", isActive && "text-sidebar-primary")}
+      />
+      {!isIcon && <span className="truncate">{label}</span>}
+      {!isIcon && comingSoon && (
+        <span className="ml-auto rounded-md bg-sidebar-accent px-1.5 py-0.5 text-[10px] font-semibold text-sidebar-foreground">
           Segera
         </span>
       )}
@@ -53,10 +56,7 @@ export function SidebarNavItem({
       <span
         aria-disabled="true"
         title={`${label} (segera hadir)`}
-        className={cn(
-          rowClassName,
-          "cursor-not-allowed text-sidebar-foreground opacity-50"
-        )}
+        className={className}
       >
         {content}
       </span>
@@ -66,14 +66,10 @@ export function SidebarNavItem({
   return (
     <Link
       href={href}
-      title={collapsed ? label : undefined}
+      title={isIcon ? label : undefined}
+      aria-label={isIcon ? label : undefined}
       aria-current={isActive ? "page" : undefined}
-      className={cn(
-        rowClassName,
-        isActive
-          ? "text-sidebar-primary"
-          : "text-sidebar-foreground hover:text-white"
-      )}
+      className={className}
     >
       {content}
     </Link>
