@@ -10,6 +10,22 @@ const MOCKING_ENABLED =
   process.env.NODE_ENV === "development" &&
   env.NEXT_PUBLIC_API_MOCKING === "enabled";
 
+declare global {
+  var __pocketlyMockingStart: Promise<unknown> | undefined;
+}
+
+/**
+ * MSW throws if `worker.start()` runs while it's already active, and in
+ * dev React Strict Mode runs effects twice while Fast Refresh re-evaluates
+ * this module — so the start promise lives on `globalThis`, once per page.
+ */
+function startMocking() {
+  globalThis.__pocketlyMockingStart ??= import("@/mocks/browser").then(
+    ({ worker }) => worker.start({ onUnhandledRequest: "bypass" })
+  );
+  return globalThis.__pocketlyMockingStart;
+}
+
 /**
  * When mock mode is on, starts the MSW service worker before rendering
  * the app so the very first request already hits the dummy data. The
@@ -21,11 +37,9 @@ export function ApiMocking({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!MOCKING_ENABLED) return;
     let active = true;
-    import("@/mocks/browser")
-      .then(({ worker }) => worker.start({ onUnhandledRequest: "bypass" }))
-      .then(() => {
-        if (active) setReady(true);
-      });
+    startMocking().then(() => {
+      if (active) setReady(true);
+    });
     return () => {
       active = false;
     };
