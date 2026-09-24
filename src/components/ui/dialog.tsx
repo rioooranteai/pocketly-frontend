@@ -50,47 +50,48 @@ const DialogContent = React.forwardRef<
     },
     ref
   ) => (
-  <DialogPortal>
-    <DialogOverlay />
-    <DialogPrimitive.Content
-      ref={ref}
-      onEscapeKeyDown={(e) => {
-        if (preventOutsideClose) e.preventDefault();
-        onEscapeKeyDown?.(e);
-      }}
-      onPointerDownOutside={(e) => {
-        if (preventOutsideClose) e.preventDefault();
-        onPointerDownOutside?.(e);
-      }}
-      onInteractOutside={(e) => {
-        if (preventOutsideClose) e.preventDefault();
-        onInteractOutside?.(e);
-      }}
-      className={cn(
-        "fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2",
-        "rounded-3xl border border-border bg-card p-6 shadow-xl",
-        "max-h-[90vh] overflow-y-auto",
-        className
-      )}
-      {...props}
-    >
-      {children}
-      {showClose && (
-        <DialogPrimitive.Close className="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-          <X size={16} />
-          <span className="sr-only">Close</span>
-        </DialogPrimitive.Close>
-      )}
-    </DialogPrimitive.Content>
-  </DialogPortal>
+    <DialogPortal>
+      <DialogOverlay />
+      <DialogPrimitive.Content
+        ref={ref}
+        onEscapeKeyDown={(e) => {
+          if (preventOutsideClose) e.preventDefault();
+          onEscapeKeyDown?.(e);
+        }}
+        onPointerDownOutside={(e) => {
+          if (preventOutsideClose) e.preventDefault();
+          onPointerDownOutside?.(e);
+        }}
+        onInteractOutside={(e) => {
+          if (preventOutsideClose) e.preventDefault();
+          onInteractOutside?.(e);
+        }}
+        className={cn(
+          "fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2",
+          "rounded-3xl border border-border bg-card p-6 shadow-xl",
+          "max-h-[90vh] overflow-y-auto scrollbar-none",
+          className
+        )}
+        {...props}
+      >
+        {children}
+        {showClose && (
+          <DialogPrimitive.Close className="absolute right-5 top-5 flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+            <X size={16} />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+        )}
+      </DialogPrimitive.Content>
+    </DialogPortal>
   )
 );
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
-function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div className={cn("mb-4 space-y-1", className)} {...props} />
-  );
+function DialogHeader({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return <div className={cn("mb-4 space-y-1", className)} {...props} />;
 }
 
 const DialogTitle = React.forwardRef<

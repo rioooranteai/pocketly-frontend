@@ -5,6 +5,8 @@ import { env } from "@/lib/env";
  */
 export const API_BASE_URL = env.NEXT_PUBLIC_API_BASE_URL;
 export const API_TIMEOUT = 30000; // 30 seconds
+// Receipt scans wait on OpenAI Vision, which regularly takes longer.
+export const SCAN_TIMEOUT = 90000; // 90 seconds
 
 /**
  * Routes
@@ -18,9 +20,6 @@ export const ROUTES = {
   PROFILE: "/profile",
   TRANSACTIONS: {
     LIST: "/transactions",
-    NEW: "/transactions/new",
-    DETAIL: (id: string) => `/transactions/${id}`,
-    EDIT: (id: string) => `/transactions/${id}/edit`,
   },
   CHATBOT: "/chatbot",
   SETTINGS: "/settings",
@@ -59,12 +58,4 @@ export const VALIDATION = {
   TRANSACTION_DESCRIPTION_MIN: 3,
   TRANSACTION_DESCRIPTION_MAX: 500,
   MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
-} as const;
-
-/**
- * UI Constants
- */
-export const PAGINATION = {
-  DEFAULT_PAGE_SIZE: 20,
-  MAX_PAGE_SIZE: 100,
 } as const;

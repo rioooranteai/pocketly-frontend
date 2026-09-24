@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api-client";
+import { SCAN_TIMEOUT } from "@/lib/constants";
 import type {
   CreateTransactionRequest,
   TransactionResponse,
@@ -15,12 +16,6 @@ import type {
 export const transactionsApi = {
   list(signal?: AbortSignal) {
     return apiClient.get<TransactionResponse[]>("/api/v1/transactions", {
-      signal,
-    });
-  },
-
-  get(id: string, signal?: AbortSignal) {
-    return apiClient.get<TransactionResponse>(`/api/v1/transactions/${id}`, {
       signal,
     });
   },
@@ -50,7 +45,8 @@ export const transactionsApi = {
     return apiClient.uploadFile<TransactionResponse>(
       "/api/v1/transactions/scan",
       file,
-      "receipt"
+      "receipt",
+      { timeoutMs: SCAN_TIMEOUT }
     );
   },
 };

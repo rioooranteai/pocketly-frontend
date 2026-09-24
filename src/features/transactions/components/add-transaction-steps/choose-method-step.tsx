@@ -18,7 +18,9 @@ export function ChooseMethodStep({ onManual, onScan }: ChooseMethodStepProps) {
     <>
       <DialogHeader>
         <DialogTitle>Tambah Transaksi</DialogTitle>
-        <DialogDescription>Pilih cara mencatat pengeluaran kamu.</DialogDescription>
+        <DialogDescription>
+          Pilih cara mencatat pengeluaran kamu.
+        </DialogDescription>
       </DialogHeader>
 
       <div className="grid grid-cols-2 gap-3">

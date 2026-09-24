@@ -7,7 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.23",
@@ -25,6 +31,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/jest-dom": "^7.0.1",
@@ -40,10 +47,23 @@
     "husky": "^9.1.7",
     "jsdom": "^26.1.0",
     "lint-staged": "^15.5.2",
+    "msw": "^2.15.0",
     "prettier": "^3.9.9",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite": "^6.4.3",
     "vitest": "^3.2.7"
+  },
+  "msw": {
+    "workerDirectory": [
+      "public"
+    ]
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,cjs}": [
+      "eslint --fix --max-warnings=0",
+      "prettier --write"
+    ],
+    "*.{json,css,md,yml,yaml}": "prettier --write"
   }
 }

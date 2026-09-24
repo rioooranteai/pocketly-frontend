@@ -63,7 +63,26 @@
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #2a2a2a;
   --sidebar-ring: #e8684a;
-  
+
+  /* Category tiles — tinted fill + icon color (icon passes 4.5:1 on its fill).
+     Fills are deep enough to stay distinct on --background, not just --card. */
+  --category-food: #fcdccd;
+  --category-food-foreground: #9e3a1a;
+  --category-transportation: #dae7f5;
+  --category-transportation-foreground: #2a5487;
+  --category-shopping: #edd6ea;
+  --category-shopping-foreground: #7d3372;
+  --category-entertainment: #f9e6b0;
+  --category-entertainment-foreground: #7a5500;
+  --category-utilities: #d7ebe1;
+  --category-utilities-foreground: #1d6246;
+  --category-health: #f9d8da;
+  --category-health-foreground: #9c2c34;
+  --category-education: #dfdcf5;
+  --category-education-foreground: #453d96;
+  --category-other: #e4ded6;
+  --category-other-foreground: #4a4642;
+
   /* Button dark variant */
   --btn-dark: #1a1a1a;
   --btn-dark-hover: #3a3a3a;
@@ -117,7 +136,28 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  
+
+  --color-category-food: var(--category-food);
+  --color-category-food-foreground: var(--category-food-foreground);
+  --color-category-transportation: var(--category-transportation);
+  --color-category-transportation-foreground: var(
+    --category-transportation-foreground
+  );
+  --color-category-shopping: var(--category-shopping);
+  --color-category-shopping-foreground: var(--category-shopping-foreground);
+  --color-category-entertainment: var(--category-entertainment);
+  --color-category-entertainment-foreground: var(
+    --category-entertainment-foreground
+  );
+  --color-category-utilities: var(--category-utilities);
+  --color-category-utilities-foreground: var(--category-utilities-foreground);
+  --color-category-health: var(--category-health);
+  --color-category-health-foreground: var(--category-health-foreground);
+  --color-category-education: var(--category-education);
+  --color-category-education-foreground: var(--category-education-foreground);
+  --color-category-other: var(--category-other);
+  --color-category-other-foreground: var(--category-other-foreground);
+
   --color-btn-dark: var(--btn-dark);
   --color-btn-dark-hover: var(--btn-dark-hover);
 
@@ -126,8 +166,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 0.5rem);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-roboto);
 }
 
 body {
@@ -150,4 +189,68 @@ body {
 
 .auth-form-enter {
   animation: auth-fade-in 0.4s ease-out both;
+}
+
+/* Sheet transitions — Radix sets data-state, and waits for the closed
+   animation to finish before unmounting, so exit plays too. */
+@theme {
+  --animate-overlay-in: overlay-in 0.25s ease-out both;
+  --animate-overlay-out: overlay-out 0.2s ease-in both;
+  --animate-sheet-in-right: sheet-in-right 0.4s cubic-bezier(0.32, 0.72, 0, 1)
+    both;
+  --animate-sheet-out-right: sheet-out-right 0.25s cubic-bezier(0.4, 0, 1, 1)
+    both;
+  --animate-sheet-in-left: sheet-in-left 0.4s cubic-bezier(0.32, 0.72, 0, 1)
+    both;
+  --animate-sheet-out-left: sheet-out-left 0.25s cubic-bezier(0.4, 0, 1, 1) both;
+  --animate-content-in: content-in 0.35s cubic-bezier(0.32, 0.72, 0, 1) both;
+
+  @keyframes overlay-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes overlay-out {
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes sheet-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(calc(100% + 1rem));
+    }
+  }
+  @keyframes sheet-out-right {
+    to {
+      opacity: 0;
+      transform: translateX(calc(100% + 1rem));
+    }
+  }
+  @keyframes sheet-in-left {
+    from {
+      opacity: 0;
+      transform: translateX(calc(-100% - 1rem));
+    }
+  }
+  @keyframes sheet-out-left {
+    to {
+      opacity: 0;
+      transform: translateX(calc(-100% - 1rem));
+    }
+  }
+  @keyframes content-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+  }
+}
+
+/* Hide the scrollbar but keep the area scrollable (wheel, touch, keyboard). */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }

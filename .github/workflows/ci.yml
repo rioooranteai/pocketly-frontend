@@ -1,0 +1,52 @@
+name: CI
+
+# Disabled for now (the project runs locally only): no automatic triggers,
+# it runs only when started by hand from the Actions tab. To re-enable,
+# add back:
+#   pull_request:
+#   push:
+#     branches: [main]
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      # Build-time only; the app never calls it during CI.
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint -- --max-warnings=0
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # Starts `next dev` in dummy-data mode itself (see playwright.config.ts).
+      - run: npm run test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

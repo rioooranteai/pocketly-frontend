@@ -1,4 +1,8 @@
+import type { Metadata } from "next";
+
 import { MonthlySummaryCards } from "@/features/dashboard/components/monthly-summary-cards";
+
+export const metadata: Metadata = { title: "Dashboard" };
 
 export default function DashboardPage() {
   return (

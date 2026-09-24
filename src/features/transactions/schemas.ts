@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-const REQUIRED_ITEM_FIELDS = "Semua field item (nama, jumlah, harga) wajib diisi.";
+const REQUIRED_ITEM_FIELDS =
+  "Semua field item (nama, jumlah, harga) wajib diisi.";
 
 // Inputs hold strings; the numeric rules run on their parsed value.
 const itemSchema = z.object({

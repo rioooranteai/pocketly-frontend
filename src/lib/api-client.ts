@@ -37,6 +37,8 @@ export function getErrorMessage(error: unknown, fallback: string): string {
 export interface RequestOptions {
   /** Lets TanStack Query cancel in-flight requests (unmount, key change). */
   signal?: AbortSignal;
+  /** Overrides API_TIMEOUT for slow endpoints (ms). */
+  timeoutMs?: number;
 }
 
 /**
@@ -50,13 +52,13 @@ function handleUnauthorized() {
 }
 
 /**
- * HTTP client untuk komunikasi dengan backend.
- * Automatically attach auth token, handle errors, dan timeout.
+ * HTTP client for the backend: attaches the auth token and turns
+ * failures (HTTP errors, network, timeout) into ApiError.
  */
 export const apiClient = {
   async request<T = unknown>(
     endpoint: string,
-    options: RequestInit = {}
+    { timeoutMs = API_TIMEOUT, ...options }: RequestInit & RequestOptions = {}
   ): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
     const headers = new Headers(options.headers);
@@ -73,7 +75,7 @@ export const apiClient = {
 
     // One signal for both the timeout and the caller's own cancellation.
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     const callerSignal = options.signal;
     const abortFromCaller = () => controller.abort();
     if (callerSignal?.aborted) controller.abort();
@@ -107,7 +109,7 @@ export const apiClient = {
         const errorMessage =
           typeof data === "object" && data !== null && "error" in data
             ? (data as { error: string }).error
-            : `HTTP ${response.status}`;
+            : `Permintaan gagal (HTTP ${response.status}).`;
 
         throw new ApiError(response.status, errorMessage, data);
       }
@@ -130,12 +132,23 @@ export const apiClient = {
         throw error;
       }
 
-      if (error instanceof TypeError && error.message === "Failed to fetch") {
-        throw new ApiError(0, "Network error. Please check your connection.");
+      // Our own timeout fired (the caller's abort was handled above).
+      if (error instanceof DOMException && error.name === "AbortError") {
+        throw new ApiError(
+          0,
+          `Server terlalu lama merespons (lebih dari ${timeoutMs / 1000} detik). Coba lagi.`
+        );
       }
 
-      if (error instanceof DOMException && error.name === "AbortError") {
-        throw new ApiError(0, `Request timeout (${API_TIMEOUT}ms exceeded)`);
+      // fetch() rejects with a TypeError only when the request never got a
+      // response (offline, DNS, CORS). The message differs per browser —
+      // "Failed to fetch", "NetworkError when attempting…", "Load failed" —
+      // so match on the type, not the text.
+      if (error instanceof TypeError) {
+        throw new ApiError(
+          0,
+          "Tidak dapat terhubung ke server. Periksa koneksi internet kamu."
+        );
       }
 
       throw error;
@@ -167,16 +180,19 @@ export const apiClient = {
     return this.request<T>(endpoint, { method: "DELETE" });
   },
 
-  /**
-   * Upload file dengan multipart/form-data
-   */
+  /** Uploads a single file as multipart/form-data. */
   uploadFile<T = unknown>(
     endpoint: string,
     file: File,
-    fieldName: string = "file"
+    fieldName: string = "file",
+    { timeoutMs }: RequestOptions = {}
   ) {
     const formData = new FormData();
     formData.append(fieldName, file);
-    return this.request<T>(endpoint, { method: "POST", body: formData });
+    return this.request<T>(endpoint, {
+      method: "POST",
+      body: formData,
+      timeoutMs,
+    });
   },
 };

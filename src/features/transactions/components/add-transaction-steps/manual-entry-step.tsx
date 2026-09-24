@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getErrorMessage } from "@/lib/api-client";
 import { useCreateTransaction } from "@/features/transactions/hooks";
@@ -8,7 +10,8 @@ import { toTransactionPayload } from "@/features/transactions/utils";
 import { BackButton } from "@/features/transactions/components/add-transaction-steps/back-button";
 
 interface ManualEntryStepProps {
-  onBack: () => void;
+  /** Shown only when the modal started at the method picker. */
+  onBack?: () => void;
   onSaved: () => void;
 }
 
@@ -18,20 +21,26 @@ export function ManualEntryStep({ onBack, onSaved }: ManualEntryStepProps) {
   return (
     <>
       <DialogHeader>
-        <BackButton onClick={onBack} />
+        {onBack && <BackButton onClick={onBack} />}
         <DialogTitle>Input Manual</DialogTitle>
       </DialogHeader>
       <TransactionFieldsForm
         onSubmit={(value) =>
           createTransaction.mutate(toTransactionPayload(value), {
-            onSuccess: onSaved,
+            onSuccess: () => {
+              toast.success("Transaksi tersimpan.");
+              onSaved();
+            },
           })
         }
         isSubmitting={createTransaction.isPending}
         submitLabel="Simpan Transaksi"
         errorMessage={
           createTransaction.isError
-            ? getErrorMessage(createTransaction.error, "Gagal menyimpan transaksi.")
+            ? getErrorMessage(
+                createTransaction.error,
+                "Gagal menyimpan transaksi."
+              )
             : null
         }
       />

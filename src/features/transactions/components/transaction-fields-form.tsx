@@ -6,7 +6,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { formatCurrency, toDateInputValue } from "@/lib/utils";
+import { cn, formatCurrency, toDateInputValue } from "@/lib/utils";
 import type {
   ItemRow,
   TransactionFieldsValue,
@@ -21,14 +21,17 @@ interface TransactionFieldsFormProps {
   isSubmitting?: boolean;
   submitLabel: string;
   errorMessage?: string | null;
+  /** Adds a secondary outline button next to submit (e.g. "Batal"). */
+  onCancel?: () => void;
+  cancelLabel?: string;
 }
 
 /**
  * Shared description + date + dynamic items editor. Used both for
  * manual entry (empty initialValues) and for reviewing/editing an
  * AI-scanned result (pre-filled initialValues) before final save —
- * the parent step (ManualEntryStep / ScanReviewStep) owns submission
- * and API calls.
+ * the parent (ManualEntryStep / ScanReviewStep / the detail sheet's
+ * edit mode) owns submission and API calls.
  */
 export function TransactionFieldsForm({
   initialValues,
@@ -36,13 +39,13 @@ export function TransactionFieldsForm({
   isSubmitting = false,
   submitLabel,
   errorMessage: externalError,
+  onCancel,
+  cancelLabel = "Batal",
 }: TransactionFieldsFormProps) {
   const [description, setDescription] = useState(
     initialValues?.description ?? ""
   );
-  const [date, setDate] = useState(
-    initialValues?.date ?? toDateInputValue()
-  );
+  const [date, setDate] = useState(initialValues?.date ?? toDateInputValue());
   const [items, setItems] = useState<ItemRow[]>(
     initialValues?.items && initialValues.items.length > 0
       ? initialValues.items
@@ -151,9 +154,7 @@ export function TransactionFieldsForm({
       </div>
 
       <div className="flex items-center justify-between rounded-xl bg-muted px-4 py-3">
-        <span className="text-sm font-medium text-muted-foreground">
-          Total
-        </span>
+        <span className="text-sm font-medium text-muted-foreground">Total</span>
         <span className="text-lg font-semibold text-foreground">
           {formatCurrency(total)}
         </span>
@@ -165,14 +166,28 @@ export function TransactionFieldsForm({
         </p>
       )}
 
-      <Button
-        type="submit"
-        variant="primary"
-        className="w-full"
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? "Menyimpan..." : submitLabel}
-      </Button>
+      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        {onCancel && (
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="rounded-full px-5"
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
+            {cancelLabel}
+          </Button>
+        )}
+        <Button
+          type="submit"
+          size="lg"
+          className={cn("rounded-full px-6", !onCancel && "w-full")}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? "Menyimpan..." : submitLabel}
+        </Button>
+      </div>
     </form>
   );
 }

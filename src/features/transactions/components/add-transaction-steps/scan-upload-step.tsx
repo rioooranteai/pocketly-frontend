@@ -13,17 +13,22 @@ import { BackButton } from "@/features/transactions/components/add-transaction-s
 
 interface ScanUploadStepProps {
   receipt: ReceiptFile;
-  onBack: () => void;
+  /** Shown only when the modal started at the method picker. */
+  onBack?: () => void;
   onSubmit: () => void;
 }
 
-export function ScanUploadStep({ receipt, onBack, onSubmit }: ScanUploadStepProps) {
+export function ScanUploadStep({
+  receipt,
+  onBack,
+  onSubmit,
+}: ScanUploadStepProps) {
   const { file, previewUrl, error, inputRef, select, clear } = receipt;
 
   return (
     <>
       <DialogHeader>
-        <BackButton onClick={onBack} />
+        {onBack && <BackButton onClick={onBack} />}
         <DialogTitle>Scan Struk</DialogTitle>
         <DialogDescription>
           Upload foto struk, AI akan baca deskripsi & item-nya otomatis.
@@ -48,7 +53,9 @@ export function ScanUploadStep({ receipt, onBack, onSubmit }: ScanUploadStepProp
             <Camera size={22} />
           </div>
           <div>
-            <p className="text-sm font-medium text-foreground">Upload foto struk</p>
+            <p className="text-sm font-medium text-foreground">
+              Upload foto struk
+            </p>
             <p className="text-xs text-muted-foreground">
               PNG atau JPG, maksimal 10MB
             </p>
@@ -56,6 +63,8 @@ export function ScanUploadStep({ receipt, onBack, onSubmit }: ScanUploadStepProp
         </button>
       ) : (
         <div className="relative overflow-hidden rounded-2xl border border-border">
+          {/* Local blob: preview — next/image can't optimize object URLs. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={previewUrl}
             alt="Preview struk"
@@ -76,7 +85,6 @@ export function ScanUploadStep({ receipt, onBack, onSubmit }: ScanUploadStepProp
 
       <Button
         type="button"
-        variant="primary"
         size="lg"
         onClick={onSubmit}
         disabled={!file}
