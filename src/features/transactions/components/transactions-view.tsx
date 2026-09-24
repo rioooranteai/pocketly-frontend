@@ -9,7 +9,6 @@ import {
   AddTransactionModal,
   type AddTransactionStart,
 } from "@/features/transactions/components/add-transaction-modal";
-import { SpendingSummary } from "@/features/transactions/components/spending-summary";
 import { TransactionDetailSheet } from "@/features/transactions/components/transaction-detail-sheet";
 import { TransactionList } from "@/features/transactions/components/transaction-list";
 import { TransactionsToolbar } from "@/features/transactions/components/transactions-toolbar";
@@ -19,7 +18,6 @@ import {
   formatMonthLabel,
   groupByDay,
   startOfMonth,
-  summarizeSpending,
   TRANSACTIONS_PAGE_SIZE,
   type CategoryFilter,
 } from "@/features/transactions/list-utils";
@@ -47,7 +45,6 @@ export function TransactionsView({ initialAdd }: TransactionsViewProps) {
 
   const isFiltered = search.trim() !== "" || category !== "all";
   const visible = filterTransactions(data ?? [], { month, search, category });
-  const summary = summarizeSpending(visible);
   // paginate() clamps the page, e.g. after deleting a page's last row.
   const pageSlice = paginate(visible, page, TRANSACTIONS_PAGE_SIZE);
   const groups = groupByDay(pageSlice.items, new Date(), visible);
@@ -112,13 +109,6 @@ export function TransactionsView({ initialAdd }: TransactionsViewProps) {
         onSearchChange={withPageReset(setSearch)}
         category={category}
         onCategoryChange={withPageReset(setCategory)}
-      />
-
-      <SpendingSummary
-        month={month}
-        summary={summary}
-        isLoading={isLoading}
-        isFiltered={isFiltered}
       />
 
       {/* scroll-mt: lands just above the list, not flush against the edge. */}

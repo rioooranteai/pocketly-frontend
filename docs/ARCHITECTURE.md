@@ -57,12 +57,12 @@ src/
 │   │   ├── hooks/                # useLogin, useRegister, useLogout
 │   │   └── api.ts
 │   ├── transactions/
-│   │   ├── components/           # View, toolbar, summary, grouped list, detail
+│   │   ├── components/           # View, toolbar, grouped list, detail
 │   │   │                         # sheet, add modal + steps, fields form
 │   │   ├── hooks/                # Queries/mutations, useReceiptFile
 │   │   ├── api.ts
 │   │   ├── categories.ts         # Label/icon/color per category + fallback
-│   │   ├── list-utils.ts         # Month filter, search, day groups, summary
+│   │   ├── list-utils.ts         # Month filter, search, day groups
 │   │   ├── query-keys.ts         # transactionKeys factory
 │   │   ├── schemas.ts            # zod form validation
 │   │   ├── types.ts              # Form-side types

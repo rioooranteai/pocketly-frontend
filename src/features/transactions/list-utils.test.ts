@@ -6,7 +6,6 @@ import {
   formatDayLabel,
   groupByDay,
   startOfMonth,
-  summarizeSpending,
 } from "@/features/transactions/list-utils";
 import type { TransactionResponse } from "@/types/api";
 
@@ -104,35 +103,5 @@ describe("groupByDay", () => {
     expect(groups).toHaveLength(1);
     expect(groups[0].transactions).toHaveLength(1);
     expect(groups[0].total).toBe(86500 + 38000);
-  });
-});
-
-describe("summarizeSpending", () => {
-  it("totals, averages and orders categories by amount", () => {
-    const month = filterTransactions(data, { month: SEPT, search: "", category: "all" });
-    const summary = summarizeSpending(month);
-
-    expect(summary.total).toBe(86500 + 200000 + 38000 + 57800);
-    expect(summary.count).toBe(4);
-    expect(summary.average).toBeCloseTo(summary.total / 4);
-    expect(summary.slices.map((s) => s.label)).toEqual([
-      "Tagihan",
-      "Makanan",
-      "Belum dikategorikan",
-      "Transportasi",
-    ]);
-    expect(summary.slices.reduce((sum, s) => sum + s.share, 0)).toBeCloseTo(1);
-  });
-
-  it("folds everything past maxSlices into one slice", () => {
-    const month = filterTransactions(data, { month: SEPT, search: "", category: "all" });
-    const summary = summarizeSpending(month, 2);
-
-    expect(summary.slices).toHaveLength(3);
-    expect(summary.slices[2]).toMatchObject({ label: "Kategori lain", amount: 57800 + 38000 });
-  });
-
-  it("handles an empty month", () => {
-    expect(summarizeSpending([])).toEqual({ total: 0, count: 0, average: 0, slices: [] });
   });
 });

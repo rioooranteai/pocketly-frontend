@@ -1,5 +1,4 @@
 import type { Category, TransactionResponse } from "@/types/api";
-import { getCategoryMeta } from "@/features/transactions/categories";
 import { toDateInputValue } from "@/lib/utils";
 
 export type CategoryFilter = Category | "all";
@@ -128,56 +127,3 @@ export function groupByDay(
 
 /** Transactions per page on the list. */
 export const TRANSACTIONS_PAGE_SIZE = 10;
-
-export interface CategorySlice {
-  key: string;
-  label: string;
-  amount: number;
-  /** 0–1 of the total. */
-  share: number;
-}
-
-export interface SpendingSummary {
-  total: number;
-  count: number;
-  average: number;
-  /** Biggest categories first; anything past `maxSlices` is one "Kategori lain" slice. */
-  slices: CategorySlice[];
-}
-
-export function summarizeSpending(
-  transactions: TransactionResponse[],
-  maxSlices = 4
-): SpendingSummary {
-  const total = transactions.reduce((sum, tx) => sum + tx.total_amount, 0);
-
-  const byCategory = new Map<string, number>();
-  for (const tx of transactions) {
-    const key = tx.category || "uncategorized";
-    byCategory.set(key, (byCategory.get(key) ?? 0) + tx.total_amount);
-  }
-
-  const sorted = [...byCategory.entries()]
-    .map(([key, amount]) => ({ key, label: getCategoryMeta(key).label, amount }))
-    .sort((a, b) => b.amount - a.amount);
-
-  const head = sorted.slice(0, maxSlices);
-  const rest = sorted.slice(maxSlices);
-  if (rest.length > 0) {
-    head.push({
-      key: "__rest",
-      label: "Kategori lain",
-      amount: rest.reduce((sum, slice) => sum + slice.amount, 0),
-    });
-  }
-
-  return {
-    total,
-    count: transactions.length,
-    average: transactions.length > 0 ? total / transactions.length : 0,
-    slices: head.map((slice) => ({
-      ...slice,
-      share: total > 0 ? slice.amount / total : 0,
-    })),
-  };
-}
