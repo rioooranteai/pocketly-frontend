@@ -2,7 +2,8 @@ import { z } from "zod";
 
 const envSchema = z.object({
   NEXT_PUBLIC_API_BASE_URL: z.url({
-    message: "NEXT_PUBLIC_API_BASE_URL must be a full URL (e.g. http://localhost:8080)",
+    message:
+      "NEXT_PUBLIC_API_BASE_URL must be a full URL (e.g. http://localhost:8080)",
   }),
   // "enabled" serves dummy data from src/mocks (MSW) instead of the backend.
   // Development only — ignored in production builds.

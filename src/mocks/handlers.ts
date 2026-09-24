@@ -16,7 +16,8 @@ const api = (path: string) => `${API_BASE_URL}/api/v1${path}`;
 const MOCK_TOKEN = "mock-token";
 
 /** Same envelope shapes the real backend uses: `{data}` / `{message, data}` / `{error}`. */
-const fail = (status: number, error: string) => HttpResponse.json({ error }, { status });
+const fail = (status: number, error: string) =>
+  HttpResponse.json({ error }, { status });
 
 function isAuthorized(request: Request) {
   return request.headers.get("Authorization")?.startsWith("Bearer ") ?? false;
@@ -24,7 +25,10 @@ function isAuthorized(request: Request) {
 
 /** Stand-in for the backend's AI categorizer: keyword guess, else "uncategorized". */
 const CATEGORY_KEYWORDS: [RegExp, Category][] = [
-  [/indomaret|alfamart|kopi|warteg|makan|resto|bakso|gofood|superindo/i, "food"],
+  [
+    /indomaret|alfamart|kopi|warteg|makan|resto|bakso|gofood|superindo/i,
+    "food",
+  ],
   [/grab|gojek|krl|bensin|spbu|parkir|tol\b/i, "transportation"],
   [/uniqlo|tokopedia|shopee|ikea|baju/i, "shopping"],
   [/cgv|xxi|netflix|spotify|game/i, "entertainment"],
@@ -34,7 +38,10 @@ const CATEGORY_KEYWORDS: [RegExp, Category][] = [
 ];
 
 function guessCategory(description: string): Category {
-  return CATEGORY_KEYWORDS.find(([pattern]) => pattern.test(description))?.[1] ?? "uncategorized";
+  return (
+    CATEGORY_KEYWORDS.find(([pattern]) => pattern.test(description))?.[1] ??
+    "uncategorized"
+  );
 }
 
 function fromRequest(
@@ -47,7 +54,10 @@ function fromRequest(
     description: body.description,
     date: body.date,
     items,
-    total_amount: items.reduce((sum, item) => sum + item.quantity * item.price, 0),
+    total_amount: items.reduce(
+      (sum, item) => sum + item.quantity * item.price,
+      0
+    ),
   };
 }
 
@@ -56,7 +66,9 @@ function authResponse(name: string, email: string) {
 }
 
 // Multi-item receipts the fake scanner "reads" (not the edge-case ones).
-const SCANNABLE = TEMPLATES.filter((t) => t.items.length > 1 && t.category !== "");
+const SCANNABLE = TEMPLATES.filter(
+  (t) => t.items.length > 1 && t.category !== ""
+);
 
 export const handlers = [
   http.post(api("/login"), async ({ request }) => {
@@ -65,7 +77,10 @@ export const handlers = [
     // Lets reviewers see the failed-login state.
     if (password === "salah") return fail(401, "Email atau password salah.");
     const name = email.split("@")[0].replace(/[._-]+/g, " ");
-    return authResponse(name.replace(/\b\w/g, (c) => c.toUpperCase()), email);
+    return authResponse(
+      name.replace(/\b\w/g, (c) => c.toUpperCase()),
+      email
+    );
   }),
 
   http.post(api("/register"), async ({ request }) => {
@@ -85,7 +100,9 @@ export const handlers = [
     await delay(300);
     if (!isAuthorized(request)) return fail(401, "Unauthorized");
     const tx = mockDb.find(String(params.id));
-    return tx ? HttpResponse.json({ data: tx }) : fail(404, "Transaksi tidak ditemukan.");
+    return tx
+      ? HttpResponse.json({ data: tx })
+      : fail(404, "Transaksi tidak ditemukan.");
   }),
 
   http.post(api("/transactions"), async ({ request }) => {
@@ -128,7 +145,8 @@ export const handlers = [
   http.post(api("/transactions/scan"), async ({ request }) => {
     if (!isAuthorized(request)) return fail(401, "Unauthorized");
     const receipt = (await request.formData()).get("receipt");
-    if (!(receipt instanceof File)) return fail(400, "File receipt wajib diupload.");
+    if (!(receipt instanceof File))
+      return fail(400, "File receipt wajib diupload.");
 
     await delay(2500); // OpenAI Vision is slow — show the processing step
     // Name the image "...gagal..." to see the scan-failure path.

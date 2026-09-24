@@ -62,7 +62,12 @@ export function TransactionDetailView({
       </div>
 
       <div className="flex justify-between gap-3 border-t border-border p-5">
-        <Button variant="outline" size="lg" className="gap-2 rounded-full px-5" onClick={onDelete}>
+        <Button
+          variant="outline"
+          size="lg"
+          className="gap-2 rounded-full px-5"
+          onClick={onDelete}
+        >
           <Trash2 size={16} />
           Hapus
         </Button>

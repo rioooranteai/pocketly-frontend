@@ -63,7 +63,11 @@ export function ConfirmDialog({
           >
             Batal
           </Button>
-          <Button variant="destructive" onClick={onConfirm} disabled={isPending}>
+          <Button
+            variant="destructive"
+            onClick={onConfirm}
+            disabled={isPending}
+          >
             {isPending ? "Memproses..." : confirmLabel}
           </Button>
         </div>

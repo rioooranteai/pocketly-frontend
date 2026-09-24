@@ -11,7 +11,11 @@ export interface PageSlice<T> {
   total: number;
 }
 
-export function paginate<T>(items: T[], page: number, pageSize: number): PageSlice<T> {
+export function paginate<T>(
+  items: T[],
+  page: number,
+  pageSize: number
+): PageSlice<T> {
   const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
   const current = Math.min(Math.max(1, page), totalPages);
   const start = (current - 1) * pageSize;

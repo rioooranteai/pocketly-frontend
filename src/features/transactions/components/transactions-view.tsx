@@ -43,7 +43,8 @@ interface TransactionsViewProps {
 
 export function TransactionsView({ initialAdd }: TransactionsViewProps) {
   const router = useRouter();
-  const firstName = useAuthStore((s) => s.user?.name?.trim().split(/\s+/)[0]) ?? "kamu";
+  const firstName =
+    useAuthStore((s) => s.user?.name?.trim().split(/\s+/)[0]) ?? "kamu";
   const { data, isLoading, isError, refetch } = useTransactions();
 
   const [month, setMonth] = useState(() => startOfMonth(new Date()));

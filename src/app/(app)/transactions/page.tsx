@@ -10,5 +10,7 @@ export default async function TransactionsPage({
 
   // Keyed so a sidebar "Scan Receipt" click while already on this page
   // remounts the view and opens the modal again.
-  return <TransactionsView key={initialAdd ?? "list"} initialAdd={initialAdd} />;
+  return (
+    <TransactionsView key={initialAdd ?? "list"} initialAdd={initialAdd} />
+  );
 }

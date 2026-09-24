@@ -7,17 +7,28 @@ interface TransactionItemsTableProps {
 }
 
 /** Read-only line items with per-row subtotal and the server's total. */
-export function TransactionItemsTable({ items, total }: TransactionItemsTableProps) {
+export function TransactionItemsTable({
+  items,
+  total,
+}: TransactionItemsTableProps) {
   return (
     <>
       <p className="mb-1 text-[13px] font-semibold">Item ({items.length})</p>
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="text-xs text-muted-foreground">
-            <th scope="col" className="py-2 text-left font-medium">Nama</th>
-            <th scope="col" className="py-2 text-right font-medium">Qty</th>
-            <th scope="col" className="py-2 text-right font-medium">Harga</th>
-            <th scope="col" className="py-2 text-right font-medium">Subtotal</th>
+            <th scope="col" className="py-2 text-left font-medium">
+              Nama
+            </th>
+            <th scope="col" className="py-2 text-right font-medium">
+              Qty
+            </th>
+            <th scope="col" className="py-2 text-right font-medium">
+              Harga
+            </th>
+            <th scope="col" className="py-2 text-right font-medium">
+              Subtotal
+            </th>
           </tr>
         </thead>
         <tbody>

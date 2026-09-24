@@ -45,9 +45,7 @@ export function TransactionFieldsForm({
   const [description, setDescription] = useState(
     initialValues?.description ?? ""
   );
-  const [date, setDate] = useState(
-    initialValues?.date ?? toDateInputValue()
-  );
+  const [date, setDate] = useState(initialValues?.date ?? toDateInputValue());
   const [items, setItems] = useState<ItemRow[]>(
     initialValues?.items && initialValues.items.length > 0
       ? initialValues.items
@@ -156,9 +154,7 @@ export function TransactionFieldsForm({
       </div>
 
       <div className="flex items-center justify-between rounded-xl bg-muted px-4 py-3">
-        <span className="text-sm font-medium text-muted-foreground">
-          Total
-        </span>
+        <span className="text-sm font-medium text-muted-foreground">Total</span>
         <span className="text-lg font-semibold text-foreground">
           {formatCurrency(total)}
         </span>

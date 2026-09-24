@@ -1,8 +1,4 @@
-import {
-  QueryClient,
-  DefaultOptions,
-  isServer,
-} from "@tanstack/react-query";
+import { QueryClient, DefaultOptions, isServer } from "@tanstack/react-query";
 
 const queryConfig: DefaultOptions = {
   queries: {

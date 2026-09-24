@@ -87,9 +87,14 @@ export function TransactionDetailSheet({
           {shown && mode === "edit" && (
             <div
               key="edit"
-              className={cn(CONTENT_ANIMATION, "overflow-y-auto scrollbar-none px-7 pb-6 pt-6")}
+              className={cn(
+                CONTENT_ANIMATION,
+                "overflow-y-auto scrollbar-none px-7 pb-6 pt-6"
+              )}
             >
-              <SheetTitle className="text-lg font-semibold">Edit transaksi</SheetTitle>
+              <SheetTitle className="text-lg font-semibold">
+                Edit transaksi
+              </SheetTitle>
               <SheetDescription className="mb-5 mt-1 text-sm text-muted-foreground">
                 Total dihitung ulang otomatis dari item.
               </SheetDescription>
@@ -114,7 +119,10 @@ export function TransactionDetailSheet({
                 }}
                 errorMessage={
                   updateTransaction.isError
-                    ? getErrorMessage(updateTransaction.error, "Gagal menyimpan perubahan.")
+                    ? getErrorMessage(
+                        updateTransaction.error,
+                        "Gagal menyimpan perubahan."
+                      )
                     : null
                 }
               />
@@ -133,7 +141,10 @@ export function TransactionDetailSheet({
         isPending={deleteTransaction.isPending}
         errorMessage={
           deleteTransaction.isError
-            ? getErrorMessage(deleteTransaction.error, "Gagal menghapus transaksi.")
+            ? getErrorMessage(
+                deleteTransaction.error,
+                "Gagal menghapus transaksi."
+              )
             : null
         }
       />

@@ -27,9 +27,14 @@ describe("seed data", () => {
     const seed = createSeedTransactions(now);
     const dayOf = (iso: string) => new Date(iso).toDateString();
 
-    expect(seed.filter((tx) => dayOf(tx.date) === now.toDateString())).toHaveLength(3);
+    expect(
+      seed.filter((tx) => dayOf(tx.date) === now.toDateString())
+    ).toHaveLength(3);
     for (const tx of seed) {
-      const sum = tx.items.reduce((s, item) => s + item.quantity * item.price, 0);
+      const sum = tx.items.reduce(
+        (s, item) => s + item.quantity * item.price,
+        0
+      );
       expect(tx.total_amount).toBe(sum);
       expect(new Date(tx.date).getTime()).toBeLessThanOrEqual(now.getTime());
     }
@@ -56,7 +61,10 @@ describe("mock API", () => {
       date: "2026-09-24T00:00:00.000Z",
       items: [{ name: "GrabCar", quantity: 1, price: 150000 }],
     });
-    expect(created).toMatchObject({ category: "transportation", total_amount: 150000 });
+    expect(created).toMatchObject({
+      category: "transportation",
+      total_amount: 150000,
+    });
 
     const updated = await transactionsApi.update(created.id, {
       description: "Grab ke bandara",

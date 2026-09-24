@@ -3,12 +3,14 @@
 ## Project Context
 
 **Pocketly** is an AI-powered personal finance tracker with:
+
 - Receipt scanning (OpenAI Vision)
 - Manual expense tracking
 - AI chatbot (RAG + NL2SQL)
 - Spending analytics & pattern detection
 
 **Tech Stack:**
+
 - Next.js 16.3.5 + React 19 + TypeScript
 - shadcn/ui + Tailwind CSS 4
 - TanStack Query + Zustand
@@ -19,6 +21,7 @@
 **Base URL:** `http://localhost:8080/api/v1`
 
 ### Key Endpoints
+
 - `POST /register` → `{name, email, token}`
 - `POST /login` → `{name, email, token}`
 - `POST /transactions` → Create expense (manual or from scan)
@@ -32,6 +35,7 @@
 ## Folder Organization
 
 Read `docs/ARCHITECTURE.md` before starting work. Key principle:
+
 - **Features live in `src/features/[feature-name]/`** with components, hooks, API, types
 - **No mixing concerns** — organized by domain, not by file type
 - **App router is for routing only** — compose components from features
@@ -46,6 +50,7 @@ Read `docs/ARCHITECTURE.md` before starting work. Key principle:
 ## Coding Standards
 
 ✅ **Always:**
+
 - Use TypeScript strict mode (no `any`)
 - Create types in `types/api.ts` matching backend
 - Use path aliases (@/lib, @/components, @/features)
@@ -55,6 +60,7 @@ Read `docs/ARCHITECTURE.md` before starting work. Key principle:
 - Use Zustand for client state, TanStack Query for server state
 
 ❌ **Never:**
+
 - Relative imports (use `@/` instead)
 - Inline styles (use Tailwind)
 - Props drilling (use composition or context)
@@ -63,6 +69,7 @@ Read `docs/ARCHITECTURE.md` before starting work. Key principle:
 ## Common Tasks
 
 ### Add Feature
+
 ```
 src/features/[name]/
 ├── components/
@@ -72,6 +79,7 @@ src/features/[name]/
 ```
 
 ### Create Query Hook
+
 ```tsx
 export const useMyData = () => {
   return useQuery({
@@ -82,6 +90,7 @@ export const useMyData = () => {
 ```
 
 ### Create Mutation Hook
+
 ```tsx
 export const useCreateItem = () => {
   return useMutation({

@@ -3,7 +3,12 @@
 import { useState, type MouseEvent } from "react";
 import { Menu, Wallet } from "lucide-react";
 
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Sidebar } from "@/components/shared/sidebar";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +22,9 @@ export function MobileNav({ className }: { className?: string }) {
   }
 
   return (
-    <header className={cn("flex shrink-0 items-center justify-between", className)}>
+    <header
+      className={cn("flex shrink-0 items-center justify-between", className)}
+    >
       <div className="flex items-center gap-2">
         <div className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-primary text-primary-foreground">
           <Wallet size={16} />

@@ -88,7 +88,9 @@ export function isKnownCategory(value: string): value is Category {
  * free text (AI-assigned), so unknown values fall back to the "other"
  * look with their raw name, and empty ones to "uncategorized".
  */
-export function getCategoryMeta(category: string | null | undefined): CategoryMeta {
+export function getCategoryMeta(
+  category: string | null | undefined
+): CategoryMeta {
   if (!category) return CATEGORY_META.uncategorized;
   if (isKnownCategory(category)) return CATEGORY_META[category];
   return { ...CATEGORY_META.other, label: category };

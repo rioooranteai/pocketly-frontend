@@ -15,9 +15,17 @@ interface PaginationProps {
 const control =
   "flex h-9 min-w-9 items-center justify-center rounded-full px-2 text-sm font-medium tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-40";
 
-export function Pagination({ page, totalPages, onPageChange, className }: PaginationProps) {
+export function Pagination({
+  page,
+  totalPages,
+  onPageChange,
+  className,
+}: PaginationProps) {
   return (
-    <nav aria-label="Paginasi" className={cn("flex items-center gap-1", className)}>
+    <nav
+      aria-label="Paginasi"
+      className={cn("flex items-center gap-1", className)}
+    >
       <button
         type="button"
         aria-label="Halaman sebelumnya"
@@ -52,7 +60,11 @@ export function Pagination({ page, totalPages, onPageChange, className }: Pagina
               </button>
             </li>
           ) : (
-            <li key={item} aria-hidden="true" className="px-1 text-sm text-muted-foreground">
+            <li
+              key={item}
+              aria-hidden="true"
+              className="px-1 text-sm text-muted-foreground"
+            >
               …
             </li>
           )

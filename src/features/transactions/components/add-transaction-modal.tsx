@@ -42,9 +42,14 @@ interface AddTransactionModalProps {
  * exists yet), so the review step actually edits an already-saved
  * record via PUT — the review UI says so explicitly.
  */
-export function AddTransactionModal({ startAt, onClose }: AddTransactionModalProps) {
+export function AddTransactionModal({
+  startAt,
+  onClose,
+}: AddTransactionModalProps) {
   const [step, setStep] = useState<Step>(START_STEP[startAt]);
-  const [scanResult, setScanResult] = useState<TransactionResponse | null>(null);
+  const [scanResult, setScanResult] = useState<TransactionResponse | null>(
+    null
+  );
   const receipt = useReceiptFile();
   const scanReceipt = useScanReceipt();
 
@@ -77,7 +82,8 @@ export function AddTransactionModal({ startAt, onClose }: AddTransactionModalPro
 
   const close = () => handleOpenChange(false);
   // Only offer "Kembali" when the person actually came from the picker.
-  const backToChoose = startAt === "choose" ? () => setStep("choose") : undefined;
+  const backToChoose =
+    startAt === "choose" ? () => setStep("choose") : undefined;
 
   return (
     <Dialog open onOpenChange={handleOpenChange}>

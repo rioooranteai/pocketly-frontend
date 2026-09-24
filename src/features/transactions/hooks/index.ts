@@ -52,8 +52,13 @@ export function useUpdateTransaction() {
   const invalidate = useInvalidateTransactions();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateTransactionRequest }) =>
-      transactionsApi.update(id, data),
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: UpdateTransactionRequest;
+    }) => transactionsApi.update(id, data),
     onSuccess: invalidate,
   });
 }

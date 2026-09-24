@@ -18,7 +18,11 @@ interface ScanUploadStepProps {
   onSubmit: () => void;
 }
 
-export function ScanUploadStep({ receipt, onBack, onSubmit }: ScanUploadStepProps) {
+export function ScanUploadStep({
+  receipt,
+  onBack,
+  onSubmit,
+}: ScanUploadStepProps) {
   const { file, previewUrl, error, inputRef, select, clear } = receipt;
 
   return (
@@ -49,7 +53,9 @@ export function ScanUploadStep({ receipt, onBack, onSubmit }: ScanUploadStepProp
             <Camera size={22} />
           </div>
           <div>
-            <p className="text-sm font-medium text-foreground">Upload foto struk</p>
+            <p className="text-sm font-medium text-foreground">
+              Upload foto struk
+            </p>
             <p className="text-xs text-muted-foreground">
               PNG atau JPG, maksimal 10MB
             </p>

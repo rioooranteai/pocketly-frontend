@@ -26,8 +26,18 @@ const NAV_ITEMS = [
   { label: "Dashboard", href: ROUTES.DASHBOARD, icon: LayoutDashboard },
   { label: "Transactions", href: ROUTES.TRANSACTIONS.LIST, icon: Receipt },
   { label: "Scan Receipt", href: ROUTES.TRANSACTIONS.SCAN, icon: Camera },
-  { label: "Chatbot", href: ROUTES.CHATBOT, icon: MessageCircle, comingSoon: true },
-  { label: "Settings", href: ROUTES.SETTINGS, icon: Settings, comingSoon: true },
+  {
+    label: "Chatbot",
+    href: ROUTES.CHATBOT,
+    icon: MessageCircle,
+    comingSoon: true,
+  },
+  {
+    label: "Settings",
+    href: ROUTES.SETTINGS,
+    icon: Settings,
+    comingSoon: true,
+  },
   { label: "Profile", href: ROUTES.PROFILE, icon: User, comingSoon: true },
 ];
 

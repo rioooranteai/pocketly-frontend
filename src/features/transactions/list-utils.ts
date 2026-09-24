@@ -75,7 +75,11 @@ export function formatDayLabel(date: Date, now: Date = new Date()): string {
   const key = toDateInputValue(date);
   if (key === toDateInputValue(now)) return `Hari ini · ${day}`;
 
-  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  const yesterday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate() - 1
+  );
   if (key === toDateInputValue(yesterday)) return `Kemarin · ${day}`;
 
   return day;

@@ -72,7 +72,11 @@ export function TransactionList({
           title="Gagal memuat transaksi"
           description="Periksa koneksi kamu, lalu coba lagi."
         >
-          <Button variant="outline" className="gap-2 rounded-full" onClick={onRetry}>
+          <Button
+            variant="outline"
+            className="gap-2 rounded-full"
+            onClick={onRetry}
+          >
             <RefreshCw size={16} />
             Coba lagi
           </Button>
@@ -99,7 +103,10 @@ export function TransactionList({
                 <Camera size={16} />
                 Scan Struk
               </Button>
-              <Button className="gap-2 rounded-full" onClick={() => onAdd("manual")}>
+              <Button
+                className="gap-2 rounded-full"
+                onClick={() => onAdd("manual")}
+              >
                 <Plus size={16} />
                 Tambah Manual
               </Button>
@@ -110,10 +117,14 @@ export function TransactionList({
         <div className="pb-3">
           {groups.map((group, i) => (
             <Fragment key={group.key}>
-              {i > 0 && <div className="mx-4 mt-1.5 h-px bg-foreground/10 md:mx-6" />}
+              {i > 0 && (
+                <div className="mx-4 mt-1.5 h-px bg-foreground/10 md:mx-6" />
+              )}
               <h2 className="flex justify-between px-4 pb-1.5 pt-3.5 text-xs font-semibold tracking-wide text-muted-foreground md:px-6">
                 <span>{group.label}</span>
-                <span className="tabular-nums">{formatCurrency(group.total)}</span>
+                <span className="tabular-nums">
+                  {formatCurrency(group.total)}
+                </span>
               </h2>
               <ul>
                 {group.transactions.map((tx) => (
@@ -126,8 +137,8 @@ export function TransactionList({
           ))}
           <div className="mt-2 flex flex-col items-center gap-2 border-t border-foreground/10 px-4 pt-3 sm:flex-row sm:justify-between md:px-6">
             <p className="text-xs tabular-nums text-muted-foreground">
-              Menampilkan {pagination.from}–{pagination.to} dari {pagination.total}{" "}
-              transaksi
+              Menampilkan {pagination.from}–{pagination.to} dari{" "}
+              {pagination.total} transaksi
             </p>
             {pagination.totalPages > 1 && (
               <Pagination
@@ -168,7 +179,11 @@ function TransactionRow({
       <span className="text-[15px] font-semibold tabular-nums text-foreground">
         {formatCurrency(tx.total_amount)}
       </span>
-      <ChevronRight size={16} aria-hidden="true" className="text-muted-foreground" />
+      <ChevronRight
+        size={16}
+        aria-hidden="true"
+        className="text-muted-foreground"
+      />
     </button>
   );
 }

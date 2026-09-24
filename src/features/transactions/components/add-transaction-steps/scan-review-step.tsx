@@ -47,7 +47,9 @@ export function ScanReviewStep({
             className="max-h-64 w-full rounded-md bg-card object-contain shadow-sm md:max-h-[560px]"
           />
         ) : (
-          <p className="text-sm text-muted-foreground">Pratinjau tidak tersedia.</p>
+          <p className="text-sm text-muted-foreground">
+            Pratinjau tidak tersedia.
+          </p>
         )}
         <p className="text-xs leading-relaxed text-muted-foreground">
           Cocokkan setiap item dengan struk sebelum menyimpan.
@@ -70,14 +72,18 @@ export function ScanReviewStep({
         >
           <Info size={16} aria-hidden="true" className="mt-0.5 shrink-0" />
           <span>
-            <strong className="font-semibold">Transaksi sudah tersimpan.</strong>{" "}
+            <strong className="font-semibold">
+              Transaksi sudah tersimpan.
+            </strong>{" "}
             Perubahan di sini akan memperbarui transaksi tersebut, bukan membuat
             yang baru.
           </span>
         </div>
 
         <div className="flex items-center gap-2.5">
-          <span className="text-xs font-medium text-muted-foreground">Kategori</span>
+          <span className="text-xs font-medium text-muted-foreground">
+            Kategori
+          </span>
           <CategoryChip category={transaction.category} />
           <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
             <Sparkles size={13} aria-hidden="true" />
@@ -104,7 +110,10 @@ export function ScanReviewStep({
           cancelLabel="Selesai tanpa perubahan"
           errorMessage={
             updateTransaction.isError
-              ? getErrorMessage(updateTransaction.error, "Gagal menyimpan perubahan.")
+              ? getErrorMessage(
+                  updateTransaction.error,
+                  "Gagal menyimpan perubahan."
+                )
               : null
           }
         />

@@ -37,7 +37,10 @@ export function ManualEntryStep({ onBack, onSaved }: ManualEntryStepProps) {
         submitLabel="Simpan Transaksi"
         errorMessage={
           createTransaction.isError
-            ? getErrorMessage(createTransaction.error, "Gagal menyimpan transaksi.")
+            ? getErrorMessage(
+                createTransaction.error,
+                "Gagal menyimpan transaksi."
+              )
             : null
         }
       />

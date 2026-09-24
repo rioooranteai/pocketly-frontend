@@ -19,7 +19,11 @@ interface TransactionsSummaryLineProps {
 }
 
 function monthTotal(transactions: TransactionResponse[], month: Date) {
-  const list = filterTransactions(transactions, { month, search: "", category: "all" });
+  const list = filterTransactions(transactions, {
+    month,
+    search: "",
+    category: "all",
+  });
   return {
     count: list.length,
     total: list.reduce((sum, tx) => sum + tx.total_amount, 0),

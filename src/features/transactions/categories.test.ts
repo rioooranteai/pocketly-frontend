@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { CATEGORY_META, getCategoryMeta } from "@/features/transactions/categories";
+import {
+  CATEGORY_META,
+  getCategoryMeta,
+} from "@/features/transactions/categories";
 import { TRANSACTION_CATEGORIES } from "@/lib/constants";
 
 describe("getCategoryMeta", () => {

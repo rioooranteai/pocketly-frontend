@@ -50,15 +50,27 @@ describe("month helpers", () => {
 
 describe("filterTransactions", () => {
   it("keeps only the selected month, newest first", () => {
-    const result = filterTransactions(data, { month: SEPT, search: "", category: "all" });
+    const result = filterTransactions(data, {
+      month: SEPT,
+      search: "",
+      category: "all",
+    });
     expect(result.map((t) => t.id)).toEqual(["c", "a", "b", "e"]);
   });
 
   it("searches description and item names, case-insensitively", () => {
-    const byDescription = filterTransactions(data, { month: SEPT, search: "KEMANG", category: "all" });
+    const byDescription = filterTransactions(data, {
+      month: SEPT,
+      search: "KEMANG",
+      category: "all",
+    });
     expect(byDescription.map((t) => t.id)).toEqual(["a"]);
 
-    const byItem = filterTransactions(data, { month: SEPT, search: "telur", category: "all" });
+    const byItem = filterTransactions(data, {
+      month: SEPT,
+      search: "telur",
+      category: "all",
+    });
     expect(byItem.map((t) => t.id)).toEqual(["e"]);
   });
 
@@ -76,7 +88,9 @@ describe("formatDayLabel", () => {
   it("prefixes today and yesterday", () => {
     expect(formatDayLabel(new Date(2026, 8, 24), NOW)).toMatch(/^Hari ini · /);
     expect(formatDayLabel(new Date(2026, 8, 23), NOW)).toMatch(/^Kemarin · /);
-    expect(formatDayLabel(new Date(2026, 8, 21), NOW)).not.toMatch(/Hari ini|Kemarin/);
+    expect(formatDayLabel(new Date(2026, 8, 21), NOW)).not.toMatch(
+      /Hari ini|Kemarin/
+    );
   });
 
   it("adds the year only outside the current year", () => {
@@ -87,16 +101,28 @@ describe("formatDayLabel", () => {
 
 describe("groupByDay", () => {
   it("groups sorted transactions by local day with subtotals", () => {
-    const sorted = filterTransactions(data, { month: SEPT, search: "", category: "all" });
+    const sorted = filterTransactions(data, {
+      month: SEPT,
+      search: "",
+      category: "all",
+    });
     const groups = groupByDay(sorted, NOW);
 
-    expect(groups.map((g) => g.key)).toEqual(["2026-09-24", "2026-09-23", "2026-09-21"]);
+    expect(groups.map((g) => g.key)).toEqual([
+      "2026-09-24",
+      "2026-09-23",
+      "2026-09-21",
+    ]);
     expect(groups[0].total).toBe(86500 + 38000);
     expect(groups[0].transactions.map((t) => t.id)).toEqual(["c", "a"]);
   });
 
   it("keeps the whole-day subtotal when a day is split across pages", () => {
-    const sorted = filterTransactions(data, { month: SEPT, search: "", category: "all" });
+    const sorted = filterTransactions(data, {
+      month: SEPT,
+      search: "",
+      category: "all",
+    });
     // Page holding only the first of today's two transactions.
     const groups = groupByDay(sorted.slice(0, 1), NOW, sorted);
 

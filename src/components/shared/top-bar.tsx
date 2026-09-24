@@ -70,8 +70,12 @@ export function TopBar({
             {getInitials(user.name)}
           </div>
           <div className="min-w-0 leading-tight">
-            <p className="truncate text-sm font-semibold text-foreground">{user.name}</p>
-            <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+            <p className="truncate text-sm font-semibold text-foreground">
+              {user.name}
+            </p>
+            <p className="truncate text-xs text-muted-foreground">
+              {user.email}
+            </p>
           </div>
         </div>
       )}
