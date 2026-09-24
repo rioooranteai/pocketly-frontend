@@ -20,10 +20,6 @@ export const ROUTES = {
   PROFILE: "/profile",
   TRANSACTIONS: {
     LIST: "/transactions",
-    // Opens the scan modal straight away (read by the transactions page).
-    SCAN: "/transactions?add=scan",
-    DETAIL: (id: string) => `/transactions/${id}`,
-    EDIT: (id: string) => `/transactions/${id}/edit`,
   },
   CHATBOT: "/chatbot",
   SETTINGS: "/settings",
@@ -62,12 +58,4 @@ export const VALIDATION = {
   TRANSACTION_DESCRIPTION_MIN: 3,
   TRANSACTION_DESCRIPTION_MAX: 500,
   MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
-} as const;
-
-/**
- * UI Constants
- */
-export const PAGINATION = {
-  DEFAULT_PAGE_SIZE: 20,
-  MAX_PAGE_SIZE: 100,
 } as const;

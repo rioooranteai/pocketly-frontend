@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import { Camera, Plus } from "lucide-react";
 
 import { TopBar } from "@/components/shared/top-bar";
@@ -23,7 +22,6 @@ import {
   TRANSACTIONS_PAGE_SIZE,
   type CategoryFilter,
 } from "@/features/transactions/list-utils";
-import { ROUTES } from "@/lib/constants";
 import { paginate } from "@/lib/pagination";
 import { useAuthStore } from "@/stores/auth";
 
@@ -36,13 +34,7 @@ function getGreeting(date = new Date()) {
   return "Selamat malam";
 }
 
-interface TransactionsViewProps {
-  /** Opens the add modal on arrival (e.g. sidebar "Scan Receipt" → ?add=scan). */
-  initialAdd?: Exclude<AddTransactionStart, "choose">;
-}
-
-export function TransactionsView({ initialAdd }: TransactionsViewProps) {
-  const router = useRouter();
+export function TransactionsView() {
   const firstName =
     useAuthStore((s) => s.user?.name?.trim().split(/\s+/)[0]) ?? "kamu";
   const { data, isLoading, isError, refetch } = useTransactions();
@@ -53,9 +45,7 @@ export function TransactionsView({ initialAdd }: TransactionsViewProps) {
   const [page, setPage] = useState(1);
   const listTopRef = useRef<HTMLDivElement>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [addStart, setAddStart] = useState<AddTransactionStart | null>(
-    initialAdd ?? null
-  );
+  const [addStart, setAddStart] = useState<AddTransactionStart | null>(null);
 
   const isFiltered = search.trim() !== "" || category !== "all";
   const visible = filterTransactions(data ?? [], { month, search, category });
@@ -76,12 +66,6 @@ export function TransactionsView({ initialAdd }: TransactionsViewProps) {
   function changePage(next: number) {
     setPage(next);
     listTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  function closeAddModal() {
-    setAddStart(null);
-    // Drop ?add=… so a refresh doesn't reopen the modal.
-    if (initialAdd) router.replace(ROUTES.TRANSACTIONS.LIST);
   }
 
   return (
@@ -170,7 +154,10 @@ export function TransactionsView({ initialAdd }: TransactionsViewProps) {
       />
 
       {addStart && (
-        <AddTransactionModal startAt={addStart} onClose={closeAddModal} />
+        <AddTransactionModal
+          startAt={addStart}
+          onClose={() => setAddStart(null)}
+        />
       )}
     </div>
   );

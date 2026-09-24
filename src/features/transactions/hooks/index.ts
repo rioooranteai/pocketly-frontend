@@ -15,14 +15,6 @@ export function useTransactions() {
   });
 }
 
-export function useTransaction(id: string) {
-  return useQuery({
-    queryKey: transactionKeys.detail(id),
-    queryFn: ({ signal }) => transactionsApi.get(id, signal),
-    enabled: !!id,
-  });
-}
-
 /** Every write can change totals, lists and details — refresh them all. */
 function useInvalidateTransactions() {
   const queryClient = useQueryClient();

@@ -20,12 +20,6 @@ export const transactionsApi = {
     });
   },
 
-  get(id: string, signal?: AbortSignal) {
-    return apiClient.get<TransactionResponse>(`/api/v1/transactions/${id}`, {
-      signal,
-    });
-  },
-
   create(data: CreateTransactionRequest) {
     return apiClient.post<TransactionResponse>("/api/v1/transactions", data);
   },

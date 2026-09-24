@@ -9,7 +9,6 @@ interface AuthState {
 
   setAuth: (response: AuthResponse) => void;
   clearAuth: () => void;
-  setUser: (user: User) => void;
 }
 
 // The store used to persist under the key apiClient read as a raw token,
@@ -36,10 +35,6 @@ export const useAuthStore = create<AuthState>()(
 
       clearAuth: () => {
         set({ token: null, user: null });
-      },
-
-      setUser: (user) => {
-        set({ user });
       },
     }),
     {
