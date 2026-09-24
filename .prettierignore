@@ -9,3 +9,5 @@ next-env.d.ts
 public/mockServiceWorker.js
 # Written and re-added by `next dev`
 AGENTS.md
+test-results
+playwright-report
