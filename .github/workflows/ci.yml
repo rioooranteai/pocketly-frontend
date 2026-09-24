@@ -1,9 +1,13 @@
 name: CI
 
+# Disabled for now (the project runs locally only): no automatic triggers,
+# it runs only when started by hand from the Actions tab. To re-enable,
+# add back:
+#   pull_request:
+#   push:
+#     branches: [main]
 on:
-  pull_request:
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}

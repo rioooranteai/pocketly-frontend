@@ -49,7 +49,7 @@ Read `docs/ARCHITECTURE.md` before starting work. Key principle:
 5. **Format:** `npm run format` (Prettier; `format:check` runs in CI)
 6. **Test:** `npm test` (Vitest unit/component), `npm run test:e2e` (Playwright, dummy-data mode)
 
-A husky pre-commit hook runs ESLint + Prettier on staged files. CI (`.github/workflows/ci.yml`) runs format check, lint, typecheck, tests, build and e2e.
+A husky pre-commit hook runs ESLint + Prettier on staged files. CI (`.github/workflows/ci.yml`, currently disabled — manual trigger only) runs format check, lint, typecheck, tests, build and e2e.
 
 ## Coding Standards
 
