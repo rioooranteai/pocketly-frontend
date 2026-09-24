@@ -78,3 +78,58 @@ test("shows the 404 page for unknown URLs", async ({ page }) => {
     page.getByRole("heading", { name: "Halaman tidak ditemukan" })
   ).toBeVisible();
 });
+
+test.describe("card height on desktop", () => {
+  test.use({ viewport: { width: 1280, height: 720 } });
+
+  // Bottom edges of the transactions card and the sidebar (main's sibling).
+  async function bottoms(page: Page) {
+    const card = page.getByRole("region", { name: "Daftar transaksi" });
+    return card.evaluate((list) => {
+      // The card is the view root's child that holds the list.
+      const cardEl = list.closest("main > div > div")!;
+      const sidebar = list.closest("main")!.previousElementSibling!;
+      return {
+        card: Math.round(cardEl.getBoundingClientRect().bottom),
+        sidebar: Math.round(sidebar.getBoundingClientRect().bottom),
+      };
+    });
+  }
+
+  test("an empty month still fills down to the sidebar's bottom", async ({
+    page,
+  }) => {
+    await logIn(page);
+    await page.goto("/transactions");
+    // Seed data never reaches into next month.
+    await page.getByRole("button", { name: "Bulan berikutnya" }).click();
+    await expect(
+      page
+        .getByRole("region", { name: "Daftar transaksi" })
+        .getByText(/Belum ada transaksi di/)
+    ).toBeVisible();
+
+    const { card, sidebar } = await bottoms(page);
+    expect(card).toBe(sidebar);
+  });
+
+  test("scrolling stops with the card level with the sidebar", async ({
+    page,
+  }) => {
+    await logIn(page);
+    await page.goto("/transactions");
+    await expect(
+      page
+        .getByRole("region", { name: "Daftar transaksi" })
+        .getByRole("button")
+        .first()
+    ).toBeVisible();
+
+    await page.locator("main").evaluate((main) => {
+      main.scrollTop = main.scrollHeight;
+    });
+
+    const { card, sidebar } = await bottoms(page);
+    expect(card).toBe(sidebar);
+  });
+});

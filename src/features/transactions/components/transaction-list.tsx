@@ -1,14 +1,7 @@
 "use client";
 
 import { Fragment } from "react";
-import {
-  AlertTriangle,
-  Camera,
-  ChevronRight,
-  Plus,
-  Receipt,
-  RefreshCw,
-} from "lucide-react";
+import { AlertTriangle, ChevronRight, Receipt, RefreshCw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
@@ -22,15 +15,12 @@ import type { DayGroup } from "@/features/transactions/list-utils";
 import { formatCurrency } from "@/lib/utils";
 import type { TransactionResponse } from "@/types/api";
 
-export type AddMethod = "manual" | "scan";
-
 interface TransactionListProps {
   groups: DayGroup[];
   isLoading: boolean;
   isError: boolean;
   onRetry: () => void;
   onSelect: (transaction: TransactionResponse) => void;
-  onAdd: (method: AddMethod) => void;
   /** e.g. "September 2026" — used in the empty state. */
   monthLabel: string;
   /** Search or category filter active: empty means "no match", not "no data". */
@@ -52,7 +42,6 @@ export function TransactionList({
   isError,
   onRetry,
   onSelect,
-  onAdd,
   monthLabel,
   isFiltered,
   pagination,
@@ -60,7 +49,7 @@ export function TransactionList({
   return (
     <section
       aria-label="Daftar transaksi"
-      className="flex min-h-[320px] flex-col"
+      className="flex min-h-[320px] flex-1 flex-col"
     >
       {isLoading ? (
         <ListSkeleton />
@@ -93,25 +82,7 @@ export function TransactionList({
             icon={<Receipt size={24} />}
             title={`Belum ada transaksi di ${monthLabel}`}
             description="Catat pengeluaran pertamamu — scan struk atau isi manual."
-          >
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                className="gap-2 rounded-full"
-                onClick={() => onAdd("scan")}
-              >
-                <Camera size={16} />
-                Scan Struk
-              </Button>
-              <Button
-                className="gap-2 rounded-full"
-                onClick={() => onAdd("manual")}
-              >
-                <Plus size={16} />
-                Tambah Manual
-              </Button>
-            </div>
-          </ListMessage>
+          />
         )
       ) : (
         <div className="pb-3">

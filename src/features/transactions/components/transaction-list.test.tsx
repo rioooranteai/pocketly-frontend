@@ -31,7 +31,6 @@ function renderList(overrides: Partial<Parameters<typeof TransactionList>[0]>) {
     isError: false,
     onRetry: vi.fn(),
     onSelect: vi.fn(),
-    onAdd: vi.fn(),
     monthLabel: "September 2026",
     isFiltered: false,
     pagination: {
@@ -65,17 +64,14 @@ describe("TransactionList", () => {
     expect(onRetry).toHaveBeenCalledOnce();
   });
 
-  it("invites adding the first transaction when the month is empty", async () => {
-    const user = userEvent.setup();
-    const { onAdd } = renderList({});
+  it("says the month is empty, without its own add buttons", () => {
+    renderList({});
 
     expect(
       screen.getByText("Belum ada transaksi di September 2026")
     ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: /scan struk/i }));
-    await user.click(screen.getByRole("button", { name: /tambah manual/i }));
-    expect(onAdd).toHaveBeenNthCalledWith(1, "scan");
-    expect(onAdd).toHaveBeenNthCalledWith(2, "manual");
+    // Adding lives in the page header / mobile FAB, not in the list.
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
   it("says nothing matched when a filter is active", () => {

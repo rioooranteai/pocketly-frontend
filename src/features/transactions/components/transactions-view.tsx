@@ -69,17 +69,22 @@ export function TransactionsView() {
   }
 
   return (
-    <div className="min-w-0 space-y-5 pb-24 lg:pb-4">
+    // min-h-full + flex-1 card: the card always reaches the bottom of the
+    // main area, level with the sidebar — even when the list is empty.
+    // No bottom padding on lg, so scrolling ends flush with the sidebar too.
+    <div className="flex min-h-full min-w-0 flex-col gap-5 pb-24 lg:pb-0">
       <TopBar
         search={search}
         onSearchChange={withPageReset(setSearch)}
         searchPlaceholder="Cari deskripsi atau item…"
       />
 
-      {/* scroll-mt: lands just above the card, not flush against the edge. */}
-      <div ref={listTopRef} className="scroll-mt-4" />
-      {/* Header, filters and list share one card. */}
-      <div className="overflow-hidden rounded-[20px] bg-card">
+      {/* Header, filters and list share one card.
+          scroll-mt: paging lands just above the card, not flush against the edge. */}
+      <div
+        ref={listTopRef}
+        className="flex flex-1 scroll-mt-4 flex-col overflow-hidden rounded-[20px] bg-card"
+      >
         <div className="flex items-center justify-between gap-4 px-4 pt-5 md:px-6">
           <div className="min-w-0">
             <h1 className="text-[26px] font-medium tracking-tight text-foreground lg:text-[32px]">
@@ -122,15 +127,14 @@ export function TransactionsView() {
           />
         </div>
         {/* Inset frame, a lighter tint of the page background, holding the list. */}
-        <div className="px-3 pb-3 md:px-4 md:pb-4">
-          <div className="overflow-hidden rounded-2xl bg-background/60">
+        <div className="flex flex-1 flex-col px-3 pb-3 md:px-4 md:pb-4">
+          <div className="flex flex-1 flex-col overflow-hidden rounded-2xl bg-background/60">
             <TransactionList
               groups={groups}
               isLoading={isLoading}
               isError={isError}
               onRetry={() => refetch()}
               onSelect={(tx) => setSelectedId(tx.id)}
-              onAdd={setAddStart}
               monthLabel={formatMonthLabel(month)}
               isFiltered={isFiltered}
               pagination={{ ...pageSlice, onPageChange: changePage }}
