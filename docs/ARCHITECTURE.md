@@ -40,13 +40,15 @@ src/
 ├── components/
 │   ├── ui/                       # Base UI primitives (shadcn/ui style)
 │   │   ├── button.tsx            # Variants: default, primary, destructive, …
-│   │   ├── input.tsx
+│   │   ├── input.tsx, password-input.tsx, field-error.tsx
 │   │   ├── label.tsx
-│   │   └── dialog.tsx
+│   │   ├── dialog.tsx
+│   │   └── sheet.tsx             # Side panel (Radix Dialog docked to an edge)
 │   └── shared/                   # App-wide composite components
 │       ├── auth-guard.tsx
 │       ├── confirm-dialog.tsx
-│       ├── sidebar.tsx
+│       ├── mobile-nav.tsx        # Top bar + sidebar drawer below md
+│       ├── sidebar.tsx           # variant: rail (desktop) | drawer (mobile)
 │       └── sidebar-nav-item.tsx
 │
 ├── features/                     # Feature-based organization
@@ -55,10 +57,14 @@ src/
 │   │   ├── hooks/                # useLogin, useRegister, useLogout
 │   │   └── api.ts
 │   ├── transactions/
-│   │   ├── components/           # List, add-transaction modal + steps, form
+│   │   ├── components/           # View, toolbar, summary, grouped list, detail
+│   │   │                         # sheet, add modal + steps, fields form
 │   │   ├── hooks/                # Queries/mutations, useReceiptFile
 │   │   ├── api.ts
+│   │   ├── categories.ts         # Label/icon/color per category + fallback
+│   │   ├── list-utils.ts         # Month filter, search, day groups, summary
 │   │   ├── query-keys.ts         # transactionKeys factory
+│   │   ├── schemas.ts            # zod form validation
 │   │   ├── types.ts              # Form-side types
 │   │   └── utils.ts              # Form <-> API payload mapping
 │   └── dashboard/

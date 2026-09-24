@@ -37,6 +37,8 @@ export function getErrorMessage(error: unknown, fallback: string): string {
 export interface RequestOptions {
   /** Lets TanStack Query cancel in-flight requests (unmount, key change). */
   signal?: AbortSignal;
+  /** Overrides API_TIMEOUT for slow endpoints (ms). */
+  timeoutMs?: number;
 }
 
 /**
@@ -56,7 +58,7 @@ function handleUnauthorized() {
 export const apiClient = {
   async request<T = unknown>(
     endpoint: string,
-    options: RequestInit = {}
+    { timeoutMs = API_TIMEOUT, ...options }: RequestInit & RequestOptions = {}
   ): Promise<T> {
     const url = `${API_BASE_URL}${endpoint}`;
     const headers = new Headers(options.headers);
@@ -73,7 +75,7 @@ export const apiClient = {
 
     // One signal for both the timeout and the caller's own cancellation.
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT);
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
     const callerSignal = options.signal;
     const abortFromCaller = () => controller.abort();
     if (callerSignal?.aborted) controller.abort();
@@ -135,7 +137,7 @@ export const apiClient = {
       }
 
       if (error instanceof DOMException && error.name === "AbortError") {
-        throw new ApiError(0, `Request timeout (${API_TIMEOUT}ms exceeded)`);
+        throw new ApiError(0, `Request timeout (${timeoutMs}ms exceeded)`);
       }
 
       throw error;
@@ -173,10 +175,15 @@ export const apiClient = {
   uploadFile<T = unknown>(
     endpoint: string,
     file: File,
-    fieldName: string = "file"
+    fieldName: string = "file",
+    { timeoutMs }: RequestOptions = {}
   ) {
     const formData = new FormData();
     formData.append(fieldName, file);
-    return this.request<T>(endpoint, { method: "POST", body: formData });
+    return this.request<T>(endpoint, {
+      method: "POST",
+      body: formData,
+      timeoutMs,
+    });
   },
 };

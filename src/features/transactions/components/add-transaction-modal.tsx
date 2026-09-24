@@ -15,43 +15,44 @@ import { ScanReviewStep } from "@/features/transactions/components/add-transacti
 
 type Step = "choose" | "manual" | "scan-upload" | "processing" | "review";
 
+export type AddTransactionStart = "choose" | "manual" | "scan";
+
+const START_STEP: Record<AddTransactionStart, Step> = {
+  choose: "choose",
+  manual: "manual",
+  scan: "scan-upload",
+};
+
 interface AddTransactionModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  /** Which step to open on; "choose" shows the manual/scan picker first. */
+  startAt: AddTransactionStart;
+  onClose: () => void;
 }
 
 /**
  * Locked, step-driven modal for adding a transaction:
- * choose -> manual (submit straight to create) OR
- * choose -> scan-upload -> processing (cannot be closed) -> review
+ * [choose ->] manual (submit straight to create) OR
+ * [choose ->] scan-upload -> processing (cannot be closed) -> review
  * (AI-extracted result, pre-filled and editable) -> save.
+ *
+ * Mounted only while open, so every open starts from a clean state.
  *
  * Note: the backend's /transactions/scan endpoint creates the
  * transaction immediately (no separate "dry-run extract" endpoint
  * exists yet), so the review step actually edits an already-saved
- * record via PUT. Closing the modal after a successful scan without
- * hitting "Simpan" still leaves the AI's raw extraction saved.
+ * record via PUT — the review UI says so explicitly.
  */
-export function AddTransactionModal({
-  open,
-  onOpenChange,
-}: AddTransactionModalProps) {
-  const [step, setStep] = useState<Step>("choose");
-  const [scanResult, setScanResult] = useState<TransactionResponse | null>(
-    null
-  );
+export function AddTransactionModal({ startAt, onClose }: AddTransactionModalProps) {
+  const [step, setStep] = useState<Step>(START_STEP[startAt]);
+  const [scanResult, setScanResult] = useState<TransactionResponse | null>(null);
   const receipt = useReceiptFile();
   const scanReceipt = useScanReceipt();
 
-  function handleOpenChange(next: boolean) {
+  function handleOpenChange(open: boolean) {
     // Locked while processing — ignore ESC / outside click / close button.
-    if (!next && step === "processing") return;
-    if (!next) {
-      setStep("choose");
-      setScanResult(null);
-      receipt.clear();
-    }
-    onOpenChange(next);
+    if (open || step === "processing") return;
+    receipt.clear();
+    onClose();
   }
 
   function handleScanSubmit() {
@@ -75,11 +76,16 @@ export function AddTransactionModal({
   }
 
   const close = () => handleOpenChange(false);
-  const backToChoose = () => setStep("choose");
+  // Only offer "Kembali" when the person actually came from the picker.
+  const backToChoose = startAt === "choose" ? () => setStep("choose") : undefined;
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent showClose={step !== "processing"} preventOutsideClose>
+    <Dialog open onOpenChange={handleOpenChange}>
+      <DialogContent
+        showClose={step !== "processing"}
+        preventOutsideClose
+        className={step === "review" ? "max-w-4xl p-0" : undefined}
+      >
         {step === "choose" && (
           <ChooseMethodStep
             onManual={() => setStep("manual")}
@@ -98,7 +104,11 @@ export function AddTransactionModal({
         )}
         {step === "processing" && <ScanProcessingStep />}
         {step === "review" && scanResult && (
-          <ScanReviewStep transaction={scanResult} onSaved={close} />
+          <ScanReviewStep
+            transaction={scanResult}
+            receiptPreviewUrl={receipt.previewUrl}
+            onDone={close}
+          />
         )}
       </DialogContent>
     </Dialog>

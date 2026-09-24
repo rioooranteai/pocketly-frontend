@@ -5,6 +5,8 @@ import { env } from "@/lib/env";
  */
 export const API_BASE_URL = env.NEXT_PUBLIC_API_BASE_URL;
 export const API_TIMEOUT = 30000; // 30 seconds
+// Receipt scans wait on OpenAI Vision, which regularly takes longer.
+export const SCAN_TIMEOUT = 90000; // 90 seconds
 
 /**
  * Routes
@@ -18,7 +20,8 @@ export const ROUTES = {
   PROFILE: "/profile",
   TRANSACTIONS: {
     LIST: "/transactions",
-    NEW: "/transactions/new",
+    // Opens the scan modal straight away (read by the transactions page).
+    SCAN: "/transactions?add=scan",
     DETAIL: (id: string) => `/transactions/${id}`,
     EDIT: (id: string) => `/transactions/${id}/edit`,
   },

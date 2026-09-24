@@ -25,7 +25,7 @@ import { SidebarNavItem } from "@/components/shared/sidebar-nav-item";
 const NAV_ITEMS = [
   { label: "Dashboard", href: ROUTES.DASHBOARD, icon: LayoutDashboard },
   { label: "Transactions", href: ROUTES.TRANSACTIONS.LIST, icon: Receipt },
-  { label: "Scan Receipt", href: ROUTES.TRANSACTIONS.NEW, icon: Camera, comingSoon: true },
+  { label: "Scan Receipt", href: ROUTES.TRANSACTIONS.SCAN, icon: Camera },
   { label: "Chatbot", href: ROUTES.CHATBOT, icon: MessageCircle, comingSoon: true },
   { label: "Settings", href: ROUTES.SETTINGS, icon: Settings, comingSoon: true },
   { label: "Profile", href: ROUTES.PROFILE, icon: User, comingSoon: true },
@@ -40,21 +40,32 @@ const NAV_ITEMS = [
  * (as a sibling in the relative wrapper), because the aside uses
  * overflow-hidden to clip its rounded corners — a child positioned
  * partially outside its bounds (-right-3) would get clipped too.
+ *
+ * `variant="drawer"`: rendered inside the mobile menu sheet — always
+ * expanded, fills its container, no collapse toggle.
  */
-export function Sidebar() {
-  const sidebarCollapsed = useUIStore((s) => s.sidebarCollapsed);
+export function Sidebar({
+  variant = "rail",
+  className,
+}: {
+  variant?: "rail" | "drawer";
+  className?: string;
+}) {
+  const isDrawer = variant === "drawer";
+  const storedCollapsed = useUIStore((s) => s.sidebarCollapsed);
+  const sidebarCollapsed = !isDrawer && storedCollapsed;
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
   const user = useAuthStore((s) => s.user);
   const logout = useLogout();
   const pathname = usePathname();
 
   return (
-    <div className="relative h-full shrink-0">
+    <div className={cn("relative h-full shrink-0", className)}>
       <aside
         className={cn(
           "flex h-full flex-col overflow-hidden rounded-3xl bg-sidebar text-sidebar-foreground",
           "transition-[width] duration-300 ease-in-out",
-          sidebarCollapsed ? "w-[76px]" : "w-[260px]"
+          isDrawer ? "w-full" : sidebarCollapsed ? "w-[76px]" : "w-[260px]"
         )}
       >
         {/* Logo — always centered, larger text */}
@@ -134,23 +145,25 @@ export function Sidebar() {
 
       {/* Collapse/expand toggle — sibling of <aside>, so it's never clipped
           by the aside's overflow-hidden. Positioned relative to this wrapper. */}
-      <button
-        onClick={toggleSidebar}
-        aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        className={cn(
-          "absolute -right-3 top-14 z-20 flex h-8 w-8 items-center justify-center",
-          "rounded-full border border-sidebar-border bg-sidebar text-sidebar-foreground",
-          "hover:bg-sidebar-accent hover:text-white transition-colors"
-        )}
-      >
-        <ChevronLeft
-          size={14}
+      {!isDrawer && (
+        <button
+          onClick={toggleSidebar}
+          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           className={cn(
-            "transition-transform duration-300",
-            sidebarCollapsed && "rotate-180"
+            "absolute -right-3 top-14 z-20 flex h-8 w-8 items-center justify-center",
+            "rounded-full border border-sidebar-border bg-sidebar text-sidebar-foreground",
+            "hover:bg-sidebar-accent hover:text-white transition-colors"
           )}
-        />
-      </button>
+        >
+          <ChevronLeft
+            size={14}
+            className={cn(
+              "transition-transform duration-300",
+              sidebarCollapsed && "rotate-180"
+            )}
+          />
+        </button>
+      )}
     </div>
   );
 }

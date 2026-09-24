@@ -40,6 +40,8 @@ export interface TransactionItemRequest {
 }
 
 export interface TransactionItemResponse {
+  // DB has an item id; optional until the backend confirms it's in the JSON.
+  id?: string;
   name: string;
   quantity: number;
   price: number;
@@ -60,6 +62,8 @@ export interface TransactionResponse {
   total_amount: number;
   date: string; // ISO 8601 format
   items: TransactionItemResponse[];
+  // DB column exists; optional until the backend confirms it's in the JSON.
+  created_at?: string;
 }
 
 /** Alias for compatibility */

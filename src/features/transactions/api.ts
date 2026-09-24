@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api-client";
+import { SCAN_TIMEOUT } from "@/lib/constants";
 import type {
   CreateTransactionRequest,
   TransactionResponse,
@@ -50,7 +51,8 @@ export const transactionsApi = {
     return apiClient.uploadFile<TransactionResponse>(
       "/api/v1/transactions/scan",
       file,
-      "receipt"
+      "receipt",
+      { timeoutMs: SCAN_TIMEOUT }
     );
   },
 };

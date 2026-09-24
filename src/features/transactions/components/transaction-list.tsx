@@ -1,143 +1,150 @@
 "use client";
 
-import { useState } from "react";
-import { Receipt, Plus, Trash2 } from "lucide-react";
-
+import { Fragment } from "react";
 import {
-  useTransactions,
-  useDeleteTransaction,
-} from "@/features/transactions/hooks";
-import { getErrorMessage } from "@/lib/api-client";
-import { cn, formatCurrency, formatDate } from "@/lib/utils";
-import type { TransactionResponse } from "@/types/api";
+  AlertTriangle,
+  Camera,
+  ChevronRight,
+  Plus,
+  Receipt,
+  RefreshCw,
+} from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { CategoryTile } from "@/features/transactions/components/category-badge";
+import {
+  ListMessage,
+  ListSkeleton,
+} from "@/features/transactions/components/transaction-list-states";
+import { getCategoryMeta } from "@/features/transactions/categories";
+import type { DayGroup } from "@/features/transactions/list-utils";
+import { formatCurrency } from "@/lib/utils";
+import type { TransactionResponse } from "@/types/api";
 
-export function TransactionList({ onAddClick }: { onAddClick: () => void }) {
-  const { data: transactions, isLoading, isError } = useTransactions();
-  const deleteTransaction = useDeleteTransaction();
-  const [pendingDelete, setPendingDelete] =
-    useState<TransactionResponse | null>(null);
+export type AddMethod = "manual" | "scan";
 
-  function askDelete(tx: TransactionResponse) {
-    deleteTransaction.reset(); // drop an error left over from a previous attempt
-    setPendingDelete(tx);
-  }
+interface TransactionListProps {
+  groups: DayGroup[];
+  isLoading: boolean;
+  isError: boolean;
+  onRetry: () => void;
+  onSelect: (transaction: TransactionResponse) => void;
+  onAdd: (method: AddMethod) => void;
+  /** e.g. "September 2026" — used in the empty state. */
+  monthLabel: string;
+  /** Search or category filter active: empty means "no match", not "no data". */
+  isFiltered: boolean;
+}
 
-  function confirmDelete() {
-    if (!pendingDelete) return;
-    deleteTransaction.mutate(pendingDelete.id, {
-      onSuccess: () => setPendingDelete(null),
-    });
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex h-40 items-center justify-center text-sm text-muted-foreground">
-        Memuat transaksi...
-      </div>
-    );
-  }
-
-  if (isError) {
-    return (
-      <div className="flex h-40 items-center justify-center text-sm text-expense">
-        Gagal memuat transaksi. Coba refresh halaman.
-      </div>
-    );
-  }
-
-  if (!transactions || transactions.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border py-16 text-center">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-          <Receipt size={22} />
-        </div>
-        <div>
-          <p className="text-sm font-medium text-foreground">
-            Belum ada transaksi
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Mulai catat pengeluaran kamu, manual atau scan struk.
-          </p>
-        </div>
-        <Button
-          size="sm"
-          variant="primary"
-          onClick={onAddClick}
-          className="mt-1"
-        >
-          <Plus size={16} className="mr-1.5" />
-          Tambah Transaksi
-        </Button>
-      </div>
-    );
-  }
-
-  const sorted = [...transactions].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  );
-
+export function TransactionList({
+  groups,
+  isLoading,
+  isError,
+  onRetry,
+  onSelect,
+  onAdd,
+  monthLabel,
+  isFiltered,
+}: TransactionListProps) {
   return (
-    <>
-      <div className="overflow-hidden rounded-xl border border-border bg-card">
-        {sorted.map((tx, i) => (
-          <div
-            key={tx.id}
-            className={cn(
-              "flex items-center justify-between gap-4 px-4 py-3.5",
-              i !== sorted.length - 1 && "border-b border-border"
-            )}
+    <section
+      aria-label="Daftar transaksi"
+      className="flex min-h-[320px] flex-col overflow-hidden rounded-[20px] bg-card"
+    >
+      {isLoading ? (
+        <ListSkeleton />
+      ) : isError ? (
+        <ListMessage
+          role="alert"
+          icon={<AlertTriangle size={24} />}
+          iconClassName="bg-category-health text-category-health-foreground"
+          title="Gagal memuat transaksi"
+          description="Periksa koneksi kamu, lalu coba lagi."
+        >
+          <Button variant="outline" className="gap-2 rounded-full" onClick={onRetry}>
+            <RefreshCw size={16} />
+            Coba lagi
+          </Button>
+        </ListMessage>
+      ) : groups.length === 0 ? (
+        isFiltered ? (
+          <ListMessage
+            icon={<Receipt size={24} />}
+            title="Tidak ada transaksi yang cocok"
+            description="Coba kata kunci atau kategori lain."
+          />
+        ) : (
+          <ListMessage
+            icon={<Receipt size={24} />}
+            title={`Belum ada transaksi di ${monthLabel}`}
+            description="Catat pengeluaran pertamamu — scan struk atau isi manual."
           >
-            <div className="flex min-w-0 items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                <Receipt size={18} />
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-foreground">
-                  {tx.description}
-                </p>
-                <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                  <span className="truncate capitalize">{tx.category}</span>
-                  <span>·</span>
-                  <span>{formatDate(tx.date)}</span>
-                  <span>·</span>
-                  <span>{tx.items.length} item</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex shrink-0 items-center gap-3">
-              <p className="text-sm font-semibold text-expense">
-                -{formatCurrency(tx.total_amount)}
-              </p>
-              <button
-                type="button"
-                onClick={() => askDelete(tx)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
-                aria-label={`Hapus transaksi ${tx.description}`}
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                className="gap-2 rounded-full"
+                onClick={() => onAdd("scan")}
               >
-                <Trash2 size={15} />
-              </button>
+                <Camera size={16} />
+                Scan Struk
+              </Button>
+              <Button className="gap-2 rounded-full" onClick={() => onAdd("manual")}>
+                <Plus size={16} />
+                Tambah Manual
+              </Button>
             </div>
-          </div>
-        ))}
-      </div>
+          </ListMessage>
+        )
+      ) : (
+        <div className="pb-2">
+          {groups.map((group, i) => (
+            <Fragment key={group.key}>
+              {i > 0 && <div className="mx-4 mt-1.5 h-px bg-border md:mx-6" />}
+              <h2 className="flex justify-between px-4 pb-1.5 pt-3.5 text-xs font-semibold tracking-wide text-muted-foreground md:px-6">
+                <span>{group.label}</span>
+                <span className="tabular-nums">{formatCurrency(group.total)}</span>
+              </h2>
+              <ul>
+                {group.transactions.map((tx) => (
+                  <li key={tx.id}>
+                    <TransactionRow transaction={tx} onSelect={onSelect} />
+                  </li>
+                ))}
+              </ul>
+            </Fragment>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
 
-      <ConfirmDialog
-        open={pendingDelete !== null}
-        onOpenChange={(open) => !open && setPendingDelete(null)}
-        title="Hapus transaksi?"
-        description={`"${pendingDelete?.description ?? ""}" akan dihapus permanen.`}
-        confirmLabel="Hapus"
-        onConfirm={confirmDelete}
-        isPending={deleteTransaction.isPending}
-        errorMessage={
-          deleteTransaction.isError
-            ? getErrorMessage(deleteTransaction.error, "Gagal menghapus transaksi.")
-            : null
-        }
-      />
-    </>
+function TransactionRow({
+  transaction: tx,
+  onSelect,
+}: {
+  transaction: TransactionResponse;
+  onSelect: (transaction: TransactionResponse) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(tx)}
+      className="flex w-full items-center gap-3.5 px-4 py-2.5 text-left transition-colors hover:bg-background/60 focus-visible:bg-background/60 focus-visible:outline-none md:px-6"
+    >
+      <CategoryTile category={tx.category} />
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium text-foreground">
+          {tx.description}
+        </p>
+        <p className="mt-0.5 text-xs text-muted-foreground">
+          {getCategoryMeta(tx.category).label} · {tx.items.length} item
+        </p>
+      </div>
+      <span className="text-[15px] font-semibold tabular-nums text-foreground">
+        {formatCurrency(tx.total_amount)}
+      </span>
+      <ChevronRight size={16} aria-hidden="true" className="text-muted-foreground" />
+    </button>
   );
 }

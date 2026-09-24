@@ -64,6 +64,24 @@
   --sidebar-border: #2a2a2a;
   --sidebar-ring: #e8684a;
   
+  /* Category tiles — tinted fill + icon color (icon passes 4.5:1 on its fill) */
+  --category-food: #fde6dc;
+  --category-food-foreground: #9e3a1a;
+  --category-transportation: #e3ecf7;
+  --category-transportation-foreground: #2a5487;
+  --category-shopping: #f3e5f1;
+  --category-shopping-foreground: #7d3372;
+  --category-entertainment: #fbeec9;
+  --category-entertainment-foreground: #7a5500;
+  --category-utilities: #e2f0ea;
+  --category-utilities-foreground: #1d6246;
+  --category-health: #fbe3e4;
+  --category-health-foreground: #9c2c34;
+  --category-education: #e6e4f7;
+  --category-education-foreground: #453d96;
+  --category-other: #ece6df;
+  --category-other-foreground: #55514c;
+
   /* Button dark variant */
   --btn-dark: #1a1a1a;
   --btn-dark-hover: #3a3a3a;
@@ -118,6 +136,23 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
   
+  --color-category-food: var(--category-food);
+  --color-category-food-foreground: var(--category-food-foreground);
+  --color-category-transportation: var(--category-transportation);
+  --color-category-transportation-foreground: var(--category-transportation-foreground);
+  --color-category-shopping: var(--category-shopping);
+  --color-category-shopping-foreground: var(--category-shopping-foreground);
+  --color-category-entertainment: var(--category-entertainment);
+  --color-category-entertainment-foreground: var(--category-entertainment-foreground);
+  --color-category-utilities: var(--category-utilities);
+  --color-category-utilities-foreground: var(--category-utilities-foreground);
+  --color-category-health: var(--category-health);
+  --color-category-health-foreground: var(--category-health-foreground);
+  --color-category-education: var(--category-education);
+  --color-category-education-foreground: var(--category-education-foreground);
+  --color-category-other: var(--category-other);
+  --color-category-other-foreground: var(--category-other-foreground);
+
   --color-btn-dark: var(--btn-dark);
   --color-btn-dark-hover: var(--btn-dark-hover);
 
