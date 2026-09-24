@@ -52,8 +52,8 @@ function handleUnauthorized() {
 }
 
 /**
- * HTTP client untuk komunikasi dengan backend.
- * Automatically attach auth token, handle errors, dan timeout.
+ * HTTP client for the backend: attaches the auth token and turns
+ * failures (HTTP errors, network, timeout) into ApiError.
  */
 export const apiClient = {
   async request<T = unknown>(
@@ -109,7 +109,7 @@ export const apiClient = {
         const errorMessage =
           typeof data === "object" && data !== null && "error" in data
             ? (data as { error: string }).error
-            : `HTTP ${response.status}`;
+            : `Permintaan gagal (HTTP ${response.status}).`;
 
         throw new ApiError(response.status, errorMessage, data);
       }
@@ -132,12 +132,23 @@ export const apiClient = {
         throw error;
       }
 
-      if (error instanceof TypeError && error.message === "Failed to fetch") {
-        throw new ApiError(0, "Network error. Please check your connection.");
+      // Our own timeout fired (the caller's abort was handled above).
+      if (error instanceof DOMException && error.name === "AbortError") {
+        throw new ApiError(
+          0,
+          `Server terlalu lama merespons (lebih dari ${timeoutMs / 1000} detik). Coba lagi.`
+        );
       }
 
-      if (error instanceof DOMException && error.name === "AbortError") {
-        throw new ApiError(0, `Request timeout (${timeoutMs}ms exceeded)`);
+      // fetch() rejects with a TypeError only when the request never got a
+      // response (offline, DNS, CORS). The message differs per browser —
+      // "Failed to fetch", "NetworkError when attempting…", "Load failed" —
+      // so match on the type, not the text.
+      if (error instanceof TypeError) {
+        throw new ApiError(
+          0,
+          "Tidak dapat terhubung ke server. Periksa koneksi internet kamu."
+        );
       }
 
       throw error;
@@ -169,9 +180,7 @@ export const apiClient = {
     return this.request<T>(endpoint, { method: "DELETE" });
   },
 
-  /**
-   * Upload file dengan multipart/form-data
-   */
+  /** Uploads a single file as multipart/form-data. */
   uploadFile<T = unknown>(
     endpoint: string,
     file: File,
