@@ -32,11 +32,12 @@ const NOW = new Date(2026, 8, 24, 10, 0);
 
 const data = [
   tx("a", "2026-09-24T08:00:00", 86500, { description: "Indomaret Kemang" }),
-  tx("b", "2026-09-23T12:00:00", 200000, { category: "utilities" }),
+  tx("b", "2026-09-23T12:00:00", 200000, { category: "bills" }),
   tx("c", "2026-09-24T19:00:00", 38000, { category: "transportation" }),
   tx("d", "2026-08-31T20:00:00", 50000),
   tx("e", "2026-09-21T09:00:00", 57800, {
-    category: "",
+    // Off-contract, but categorization must never break the list.
+    category: "" as TransactionResponse["category"],
     items: [{ name: "Telur ayam", quantity: 1, price: 57800 }],
   }),
 ];

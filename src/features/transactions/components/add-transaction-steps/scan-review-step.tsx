@@ -33,8 +33,11 @@ export function ScanReviewStep({
   const updateTransaction = useUpdateTransaction();
 
   return (
-    <div className="grid md:grid-cols-[340px_minmax(0,1fr)]">
-      <div className="flex flex-col gap-3.5 bg-background p-6 md:p-7">
+    // From md up the modal is capped at the viewport height: the receipt
+    // stays put and only the item list scrolls, so the bottom items can be
+    // checked against the image.
+    <div className="grid md:min-h-0 md:flex-1 md:grid-cols-[340px_minmax(0,1fr)] md:grid-rows-[minmax(0,1fr)]">
+      <div className="flex flex-col gap-3.5 bg-background p-6 md:min-h-0 md:p-7">
         <p className="text-xs font-semibold text-muted-foreground">
           Struk yang kamu upload
         </p>
@@ -44,7 +47,7 @@ export function ScanReviewStep({
           <img
             src={receiptPreviewUrl}
             alt="Foto struk yang diupload"
-            className="max-h-64 w-full rounded-md bg-card object-contain shadow-sm md:max-h-[560px]"
+            className="max-h-64 w-full rounded-md bg-card object-contain shadow-sm md:max-h-[560px] md:min-h-0 md:flex-1"
           />
         ) : (
           <p className="text-sm text-muted-foreground">
@@ -56,7 +59,7 @@ export function ScanReviewStep({
         </p>
       </div>
 
-      <div className="flex min-w-0 flex-col gap-[18px] p-6 md:px-8 md:py-7">
+      <div className="flex min-w-0 flex-col gap-[18px] p-6 md:min-h-0 md:px-8 md:py-7">
         <div className="pr-12">
           <DialogTitle className="text-[22px] font-semibold tracking-tight">
             Cek hasil scan
@@ -95,7 +98,10 @@ export function ScanReviewStep({
           initialValues={toTransactionFieldsValue(transaction)}
           onSubmit={(value) =>
             updateTransaction.mutate(
-              { id: transaction.id, data: toTransactionPayload(value) },
+              {
+                id: transaction.id,
+                data: toTransactionPayload(value, transaction),
+              },
               {
                 onSuccess: () => {
                   toast.success("Perubahan disimpan.");
@@ -106,6 +112,7 @@ export function ScanReviewStep({
           }
           isSubmitting={updateTransaction.isPending}
           submitLabel="Simpan perubahan"
+          scrollItems
           onCancel={onDone}
           cancelLabel="Selesai tanpa perubahan"
           errorMessage={

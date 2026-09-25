@@ -120,30 +120,38 @@ POST   /transactions/scan         # Upload receipt image → AI extracts items
 
 #### Data Models
 
+> Source of truth: the backend's `docs/api-contract.md`. `src/types/api.ts`
+> mirrors it; when they disagree, the contract wins.
+
 ```typescript
-User {
-  id: string
+AuthResponse {            // /register, /login — NOT wrapped in `data`
   name: string
   email: string
-  createdAt: string
+  token: string           // JWT, valid 12 hours, no refresh
 }
 
-Transaction {
-  id: string
+Transaction {             // wrapped as {data} or {message, data}
+  id: string (UUID)
   description: string
-  category: string
-  total_amount: number
-  date: string (ISO 8601)
+  category: Category      // server-assigned, never sent by the FE
+  total_amount: number    // server-computed, never sent by the FE
+  date: string            // full RFC 3339 with offset; bare dates rejected
   items: TransactionItem[]
-  createdAt?: string
 }
 
-TransactionItem {
+TransactionItem {         // no id
   name: string
-  quantity: number
-  price: number
+  quantity: number        // integer >= 0
+  price: number           // >= 0
 }
+
+Category = "food" | "transportation" | "shopping" | "bills"
+         | "entertainment" | "health" | "others" | "uncategorized"
 ```
+
+Errors are `{ "error": string }` (unknown routes: plain-text 404). DELETE
+answers 204 with no body. Receipt uploads are capped at 5MB and rate-limited
+(429 + `Retry-After`).
 
 **Auth Flow:**
 

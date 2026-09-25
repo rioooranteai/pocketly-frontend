@@ -9,7 +9,7 @@ import {
   CategoryTile,
 } from "@/features/transactions/components/category-badge";
 import { TransactionItemsTable } from "@/features/transactions/components/transaction-items-table";
-import { formatCurrency, formatDateTime } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import type { TransactionResponse } from "@/types/api";
 
 /** Read-only body of the detail sheet: header, meta, items, actions. */
@@ -50,10 +50,6 @@ export function TransactionDetailView({
         </div>
         <dl className="grid grid-cols-2 gap-3">
           <MetaItem label="Tanggal transaksi" value={transactionDate} />
-          {/* created_at: only shown once the backend includes it in the JSON. */}
-          {tx.created_at && (
-            <MetaItem label="Dicatat" value={formatDateTime(tx.created_at)} />
-          )}
         </dl>
       </div>
 

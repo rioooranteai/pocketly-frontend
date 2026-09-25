@@ -5,8 +5,9 @@ import { env } from "@/lib/env";
  */
 export const API_BASE_URL = env.NEXT_PUBLIC_API_BASE_URL;
 export const API_TIMEOUT = 30000; // 30 seconds
-// Receipt scans wait on OpenAI Vision, which regularly takes longer.
-export const SCAN_TIMEOUT = 90000; // 90 seconds
+// The backend gives OpenAI Vision up to 25s per scan; the API contract
+// asks the client to wait at least 30s, so leave headroom above that.
+export const SCAN_TIMEOUT = 40000; // 40 seconds
 
 /**
  * Routes
@@ -35,18 +36,19 @@ export const STORAGE_KEYS = {
 } as const;
 
 /**
- * Transaction Categories (fallback values)
+ * Transaction categories — the closed set the backend assigns (API
+ * contract §3). "others" is a confident "none of the above";
+ * "uncategorized" means the AI couldn't decide.
  */
 export const TRANSACTION_CATEGORIES = [
-  "uncategorized",
   "food",
   "transportation",
   "shopping",
+  "bills",
   "entertainment",
-  "utilities",
   "health",
-  "education",
-  "other",
+  "others",
+  "uncategorized",
 ] as const;
 
 /**
@@ -54,8 +56,10 @@ export const TRANSACTION_CATEGORIES = [
  */
 export const VALIDATION = {
   EMAIL: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+  NAME_MAX_LENGTH: 100,
+  EMAIL_MAX_LENGTH: 254,
   PASSWORD_MIN_LENGTH: 8,
-  TRANSACTION_DESCRIPTION_MIN: 3,
-  TRANSACTION_DESCRIPTION_MAX: 500,
-  MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
+  PASSWORD_MAX_LENGTH: 128,
+  // Receipt upload limit on POST /transactions/scan.
+  MAX_FILE_SIZE: 5 * 1024 * 1024, // 5MB
 } as const;

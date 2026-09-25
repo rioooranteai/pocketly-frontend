@@ -29,7 +29,7 @@ export function TransactionItemRow({
       />
       <Input
         type="number"
-        min={1}
+        min={0}
         step={1}
         placeholder="Qty"
         aria-label="Jumlah"

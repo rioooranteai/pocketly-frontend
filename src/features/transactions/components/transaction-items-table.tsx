@@ -1,8 +1,8 @@
 import { formatCurrency } from "@/lib/utils";
-import type { TransactionItemResponse } from "@/types/api";
+import type { TransactionItem } from "@/types/api";
 
 interface TransactionItemsTableProps {
-  items: TransactionItemResponse[];
+  items: TransactionItem[];
   total: number;
 }
 
@@ -32,8 +32,9 @@ export function TransactionItemsTable({
           </tr>
         </thead>
         <tbody>
+          {/* Items have no id in the API; this list is read-only, so index is stable. */}
           {items.map((item, index) => (
-            <tr key={item.id ?? index} className="border-t border-border">
+            <tr key={index} className="border-t border-border">
               <td className="py-3 pr-2">{item.name}</td>
               <td className="py-3 text-right tabular-nums">{item.quantity}</td>
               <td className="py-3 pl-2 text-right tabular-nums text-muted-foreground">

@@ -1,16 +1,19 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
+import { useId, useRef, useState, type FormEvent } from "react";
 import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn, formatCurrency, toDateInputValue } from "@/lib/utils";
+import { cn, toDateInputValue } from "@/lib/utils";
 import type {
+  DiscountValue,
   ItemRow,
   TransactionFieldsValue,
 } from "@/features/transactions/types";
+import { getSubtotal, NO_DISCOUNT } from "@/features/transactions/discount";
+import { TransactionTotalSection } from "@/features/transactions/components/transaction-total-section";
 import { TransactionItemRow } from "@/features/transactions/components/transaction-item-row";
 import { transactionFieldsSchema } from "@/features/transactions/schemas";
 import { createItemRow } from "@/features/transactions/utils";
@@ -24,6 +27,11 @@ interface TransactionFieldsFormProps {
   /** Adds a secondary outline button next to submit (e.g. "Batal"). */
   onCancel?: () => void;
   cancelLabel?: string;
+  /**
+   * From md up: fill the parent's height and scroll only the item list,
+   * keeping the fields, total and buttons in view (scan review).
+   */
+  scrollItems?: boolean;
 }
 
 /**
@@ -41,6 +49,7 @@ export function TransactionFieldsForm({
   errorMessage: externalError,
   onCancel,
   cancelLabel = "Batal",
+  scrollItems = false,
 }: TransactionFieldsFormProps) {
   const [description, setDescription] = useState(
     initialValues?.description ?? ""
@@ -51,14 +60,14 @@ export function TransactionFieldsForm({
       ? initialValues.items
       : [createItemRow()]
   );
+  const [discount, setDiscount] = useState<DiscountValue>(
+    initialValues?.discount ?? NO_DISCOUNT
+  );
   const [formError, setFormError] = useState<string | null>(null);
   const fieldId = useId();
+  const itemListRef = useRef<HTMLDivElement>(null);
 
-  const total = items.reduce((sum, item) => {
-    const qty = Number(item.quantity) || 0;
-    const price = Number(item.price) || 0;
-    return sum + qty * price;
-  }, 0);
+  const subtotal = getSubtotal(items);
 
   function updateItem(index: number, patch: Partial<ItemRow>) {
     setItems((prev) =>
@@ -68,6 +77,11 @@ export function TransactionFieldsForm({
 
   function addItem() {
     setItems((prev) => [...prev, createItemRow()]);
+    // Bring the new row into view once it has rendered.
+    requestAnimationFrame(() => {
+      const list = itemListRef.current;
+      list?.lastElementChild?.scrollIntoView({ block: "nearest" });
+    });
   }
 
   function removeItem(index: number) {
@@ -82,6 +96,7 @@ export function TransactionFieldsForm({
       description,
       date,
       items,
+      discount,
     });
     if (!result.success) {
       // One message at a time, in field order — the form has a single error slot.
@@ -95,7 +110,13 @@ export function TransactionFieldsForm({
   const errorMessage = formError ?? externalError ?? null;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form
+      onSubmit={handleSubmit}
+      className={cn(
+        "space-y-5",
+        scrollItems && "md:flex md:min-h-0 md:flex-1 md:flex-col"
+      )}
+    >
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
           <Label
@@ -127,7 +148,12 @@ export function TransactionFieldsForm({
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div
+        className={cn(
+          "space-y-2",
+          scrollItems && "md:flex md:min-h-0 md:flex-1 md:flex-col"
+        )}
+      >
         <div className="flex items-center justify-between">
           <p className="text-xs font-medium text-muted-foreground">Item</p>
           <button
@@ -140,7 +166,15 @@ export function TransactionFieldsForm({
           </button>
         </div>
 
-        <div className="space-y-2">
+        <div
+          ref={itemListRef}
+          className={cn(
+            "space-y-2",
+            // Padding keeps input focus rings from being clipped.
+            scrollItems &&
+              "md:-mx-1 md:min-h-0 md:flex-1 md:overflow-y-auto md:px-1 md:py-1"
+          )}
+        >
           {items.map((item, index) => (
             <TransactionItemRow
               key={item.id}
@@ -153,12 +187,11 @@ export function TransactionFieldsForm({
         </div>
       </div>
 
-      <div className="flex items-center justify-between rounded-xl bg-muted px-4 py-3">
-        <span className="text-sm font-medium text-muted-foreground">Total</span>
-        <span className="text-lg font-semibold text-foreground">
-          {formatCurrency(total)}
-        </span>
-      </div>
+      <TransactionTotalSection
+        subtotal={subtotal}
+        discount={discount}
+        onDiscountChange={setDiscount}
+      />
 
       {errorMessage && (
         <p role="alert" className="text-sm text-expense">

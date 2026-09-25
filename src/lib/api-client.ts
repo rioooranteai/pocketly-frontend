@@ -1,6 +1,8 @@
 import { API_BASE_URL, API_TIMEOUT } from "@/lib/constants";
 import { getQueryClient } from "@/lib/query-client";
+import { parseRetryAfter, toUserMessage } from "@/lib/api-errors";
 import { useAuthStore } from "@/stores/auth";
+import type { ApiErrorBody } from "@/types/api";
 
 export interface ApiResponse<T = unknown> {
   data?: T;
@@ -17,12 +19,23 @@ export interface ApiErrorDetail {
 export class ApiError extends Error implements ApiErrorDetail {
   status: number;
   details?: unknown;
+  /** The backend's raw `error` string, for matching specific failures. */
+  serverMessage?: string;
+  /** Seconds to wait before retrying, from a 429's `Retry-After`. */
+  retryAfter?: number;
 
-  constructor(status: number, message: string, details?: unknown) {
+  constructor(
+    status: number,
+    message: string,
+    details?: unknown,
+    extra: { serverMessage?: string; retryAfter?: number } = {}
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
     this.details = details;
+    this.serverMessage = extra.serverMessage;
+    this.retryAfter = extra.retryAfter;
   }
 }
 
@@ -88,9 +101,13 @@ export const apiClient = {
         signal: controller.signal,
       });
 
+      // DELETE answers 204 with no body.
+      if (response.status === 204) return undefined as T;
+
       const contentType = response.headers.get("content-type");
       let data: unknown = null;
 
+      // Unknown routes answer a plain-text 404, so check before parsing.
       if (contentType?.includes("application/json")) {
         data = await response.json();
       } else if (contentType?.includes("text")) {
@@ -106,15 +123,22 @@ export const apiClient = {
           handleUnauthorized();
         }
 
-        const errorMessage =
+        const serverMessage =
           typeof data === "object" && data !== null && "error" in data
-            ? (data as { error: string }).error
-            : `Permintaan gagal (HTTP ${response.status}).`;
+            ? (data as ApiErrorBody).error
+            : undefined;
+        const retryAfter = parseRetryAfter(response.headers.get("Retry-After"));
 
-        throw new ApiError(response.status, errorMessage, data);
+        throw new ApiError(
+          response.status,
+          toUserMessage(response.status, serverMessage, retryAfter),
+          data,
+          { serverMessage, retryAfter }
+        );
       }
 
-      // Handle response shape: sometimes wrapped in {data: T}, sometimes direct T
+      // Transaction endpoints wrap the payload in {data} (plus a message on
+      // writes); auth endpoints return it bare.
       if (
         typeof data === "object" &&
         data !== null &&

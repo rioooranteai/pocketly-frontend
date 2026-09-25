@@ -22,9 +22,9 @@ describe("getCategoryMeta", () => {
     expect(getCategoryMeta(undefined)).toBe(CATEGORY_META.uncategorized);
   });
 
-  it("keeps an unknown AI category's raw name with the 'other' look", () => {
+  it("keeps an unexpected category's raw name with the 'others' look", () => {
     const meta = getCategoryMeta("groceries");
     expect(meta.label).toBe("groceries");
-    expect(meta.icon).toBe(CATEGORY_META.other.icon);
+    expect(meta.icon).toBe(CATEGORY_META.others.icon);
   });
 });

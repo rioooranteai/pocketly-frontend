@@ -57,14 +57,12 @@ const twMerge = extendTailwindMerge({
         "category-shopping-foreground",
         "category-entertainment",
         "category-entertainment-foreground",
-        "category-utilities",
-        "category-utilities-foreground",
+        "category-bills",
+        "category-bills-foreground",
         "category-health",
         "category-health-foreground",
-        "category-education",
-        "category-education-foreground",
-        "category-other",
-        "category-other-foreground",
+        "category-others",
+        "category-others-foreground",
         "btn-dark",
         "btn-dark-hover",
       ],
@@ -131,6 +129,20 @@ export function toDateInputValue(date: Date = new Date()): string {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
+}
+
+/**
+ * Full RFC 3339 timestamp in the user's LOCAL timezone, with its offset —
+ * the format the API requires for dates (a bare yyyy-mm-dd is rejected).
+ * Example: "2026-09-25T12:30:00+07:00"
+ */
+export function toRfc3339(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const offset = -date.getTimezoneOffset();
+  const sign = offset >= 0 ? "+" : "-";
+  const abs = Math.abs(offset);
+  const time = `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  return `${toDateInputValue(date)}T${time}${sign}${pad(Math.floor(abs / 60))}:${pad(abs % 60)}`;
 }
 
 /**

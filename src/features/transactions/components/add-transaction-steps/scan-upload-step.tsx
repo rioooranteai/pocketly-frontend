@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, X, ArrowRight } from "lucide-react";
+import { Camera, X, ArrowRight, PencilLine } from "lucide-react";
 
 import {
   DialogHeader,
@@ -16,12 +16,18 @@ interface ScanUploadStepProps {
   /** Shown only when the modal started at the method picker. */
   onBack?: () => void;
   onSubmit: () => void;
+  /** Offered after a 422 (receipt unreadable): switch to manual entry. */
+  onManual?: () => void;
+  /** Seconds until scanning is allowed again after a 429. */
+  cooldownSeconds?: number;
 }
 
 export function ScanUploadStep({
   receipt,
   onBack,
   onSubmit,
+  onManual,
+  cooldownSeconds = 0,
 }: ScanUploadStepProps) {
   const { file, previewUrl, error, inputRef, select, clear } = receipt;
 
@@ -38,7 +44,7 @@ export function ScanUploadStep({
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp"
         onChange={select}
         className="hidden"
       />
@@ -57,7 +63,7 @@ export function ScanUploadStep({
               Upload foto struk
             </p>
             <p className="text-xs text-muted-foreground">
-              PNG atau JPG, maksimal 10MB
+              JPG, PNG atau WebP, maksimal 5MB
             </p>
           </div>
         </button>
@@ -87,12 +93,31 @@ export function ScanUploadStep({
         type="button"
         size="lg"
         onClick={onSubmit}
-        disabled={!file}
+        disabled={!file || cooldownSeconds > 0}
         className="mt-5 w-full gap-2 rounded-full"
       >
-        Scan Sekarang
-        <ArrowRight size={16} />
+        {cooldownSeconds > 0 ? (
+          `Coba lagi dalam ${cooldownSeconds} detik`
+        ) : (
+          <>
+            {onManual ? "Scan Ulang" : "Scan Sekarang"}
+            <ArrowRight size={16} />
+          </>
+        )}
       </Button>
+
+      {onManual && (
+        <Button
+          type="button"
+          size="lg"
+          variant="outline"
+          onClick={onManual}
+          className="mt-2 w-full gap-2 rounded-full"
+        >
+          <PencilLine size={16} />
+          Isi Manual
+        </Button>
+      )}
     </>
   );
 }

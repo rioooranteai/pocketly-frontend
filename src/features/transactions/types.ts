@@ -11,8 +11,22 @@ export interface ItemRow {
   price: string;
 }
 
+/** "percent" = % off the subtotal; "amount" = rupiah off the subtotal. */
+export type DiscountType = "percent" | "amount";
+
+/**
+ * Receipt-level discount. FE-only: the API has no discount field, so it
+ * is folded into each item's unit price before saving (see discount.ts).
+ */
+export interface DiscountValue {
+  type: DiscountType;
+  /** Raw input; "" means no discount. */
+  value: string;
+}
+
 export interface TransactionFieldsValue {
   description: string;
   date: string; // yyyy-mm-dd
   items: ItemRow[];
+  discount: DiscountValue;
 }

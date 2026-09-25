@@ -38,9 +38,9 @@ describe("seed data", () => {
       expect(tx.total_amount).toBe(sum);
       expect(new Date(tx.date).getTime()).toBeLessThanOrEqual(now.getTime());
     }
-    // Edge cases the UI must handle are present.
-    expect(seed.some((tx) => tx.category === "")).toBe(true);
-    expect(seed.some((tx) => tx.category === "groceries")).toBe(true);
+    // Both "no category" flavours the UI must tell apart are present.
+    expect(seed.some((tx) => tx.category === "others")).toBe(true);
+    expect(seed.some((tx) => tx.category === "uncategorized")).toBe(true);
   });
 });
 
@@ -52,13 +52,16 @@ describe("mock API", () => {
 
     await expect(
       authApi.login({ email: "dewi@mail.com", password: "salah" })
-    ).rejects.toMatchObject({ status: 401 });
+    ).rejects.toMatchObject({
+      status: 401,
+      message: "Email atau password salah.",
+    });
   });
 
   it("creates, updates and deletes a transaction", async () => {
     const created = await transactionsApi.create({
       description: "Grab ke bandara",
-      date: "2026-09-24T00:00:00.000Z",
+      date: "2026-09-24T08:00:00+07:00",
       items: [{ name: "GrabCar", quantity: 1, price: 150000 }],
     });
     expect(created).toMatchObject({
@@ -77,15 +80,35 @@ describe("mock API", () => {
     expect(updated.total_amount).toBe(174000);
     expect(updated.category).toBe("transportation");
 
-    await transactionsApi.remove(created.id);
+    await expect(transactionsApi.remove(created.id)).resolves.toBeUndefined();
     const list = await transactionsApi.list();
     expect(list.some((tx) => tx.id === created.id)).toBe(false);
+
+    const gone = await transactionsApi.remove(created.id).catch((e) => e);
+    expect(gone).toMatchObject({
+      status: 404,
+      serverMessage: "Transaction not found",
+    });
+  });
+
+  it("rejects a bare date like the backend", async () => {
+    const error = await transactionsApi
+      .create({
+        description: "Kopi",
+        date: "2026-09-24",
+        items: [{ name: "Kopi", quantity: 1, price: 20000 }],
+      })
+      .catch((e: unknown) => e);
+    expect(error).toMatchObject({
+      status: 400,
+      serverMessage: "invalid request body",
+    });
   });
 
   it("falls back to uncategorized when nothing matches", async () => {
     const created = await transactionsApi.create({
       description: "Titip beli sesuatu",
-      date: "2026-09-24T00:00:00.000Z",
+      date: "2026-09-24T08:00:00+07:00",
       items: [{ name: "Barang", quantity: 1, price: 10000 }],
     });
     expect(created.category).toBe("uncategorized");

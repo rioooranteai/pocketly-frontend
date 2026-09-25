@@ -47,6 +47,48 @@ describe("apiClient", () => {
     expect(error.message).toBe("Tidak valid");
   });
 
+  it("translates known backend errors and keeps the raw message", async () => {
+    fetchMock.mockResolvedValue(
+      jsonResponse({ error: "Transaction not found" }, 404)
+    );
+
+    const error = await catchApiError(apiClient.get("/x"));
+    expect(error.message).toMatch(/Transaksi tidak ditemukan/);
+    expect(error.serverMessage).toBe("Transaction not found");
+  });
+
+  it("reads Retry-After on a 429", async () => {
+    fetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ error: "too many requests" }), {
+        status: 429,
+        headers: { "Content-Type": "application/json", "Retry-After": "42" },
+      })
+    );
+
+    const error = await catchApiError(apiClient.get("/x"));
+    expect(error.retryAfter).toBe(42);
+    expect(error.message).toMatch(/42 detik/);
+  });
+
+  it("returns undefined for a 204 without a body", async () => {
+    fetchMock.mockResolvedValue(new Response(null, { status: 204 }));
+
+    await expect(apiClient.delete("/x")).resolves.toBeUndefined();
+  });
+
+  it("handles the plain-text 404 of an unknown route", async () => {
+    fetchMock.mockResolvedValue(
+      new Response("404 page not found", {
+        status: 404,
+        headers: { "Content-Type": "text/plain" },
+      })
+    );
+
+    const error = await catchApiError(apiClient.get("/nope"));
+    expect(error.status).toBe(404);
+    expect(error.serverMessage).toBeUndefined();
+  });
+
   it.each([
     ["Chrome", "Failed to fetch"],
     ["Firefox", "NetworkError when attempting to fetch resource."],

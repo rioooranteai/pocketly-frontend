@@ -1,4 +1,9 @@
-import type { TransactionItemResponse, TransactionResponse } from "@/types/api";
+import { toRfc3339 } from "@/lib/utils";
+import type {
+  Category,
+  TransactionItem,
+  TransactionResponse,
+} from "@/types/api";
 
 /**
  * Dummy transactions for API mocking. Deterministic (seeded PRNG) so
@@ -10,8 +15,8 @@ type ItemTemplate = [name: string, quantity: number, price: number];
 
 export interface ReceiptTemplate {
   description: string;
-  /** Free text like the backend's AI output — "" and unknown values on purpose. */
-  category: string;
+  /** What the backend's AI would assign — always one of the contract's categories. */
+  category: Category;
   items: ItemTemplate[];
 }
 
@@ -128,17 +133,17 @@ export const TEMPLATES: ReceiptTemplate[] = [
   },
   {
     description: "Token listrik PLN",
-    category: "utilities",
+    category: "bills",
     items: [["Token 200rb", 1, 200000]],
   },
   {
     description: "IndiHome",
-    category: "utilities",
+    category: "bills",
     items: [["Internet bulanan", 1, 385000]],
   },
   {
     description: "Telkomsel",
-    category: "utilities",
+    category: "bills",
     items: [["Paket data 25GB", 1, 105000]],
   },
   {
@@ -160,7 +165,7 @@ export const TEMPLATES: ReceiptTemplate[] = [
   },
   {
     description: "Gramedia Matraman",
-    category: "education",
+    category: "shopping",
     items: [
       ["Buku Atomic Habits", 1, 108000],
       ["Pulpen", 3, 8000],
@@ -168,16 +173,25 @@ export const TEMPLATES: ReceiptTemplate[] = [
     ],
   },
   {
-    description: "Udemy",
-    category: "education",
-    items: [["Kursus React lanjutan", 1, 179000]],
+    description: "Lotte Mart Gandaria",
+    category: "food",
+    items: [
+      ["Susu UHT 1L", 2, 19500],
+      ["Sereal", 1, 52000],
+    ],
   },
+  // Edge cases the UI must show distinctly: "others" is a confident
+  // "none of the above", "uncategorized" means the AI couldn't decide.
   {
     description: "Laundry Kiloan Bersih",
-    category: "other",
+    category: "others",
     items: [["Cuci setrika 5kg", 1, 45000]],
   },
-  // Edge cases: categorization failed / returned an unknown value.
+  {
+    description: "Sewa kos Oktober",
+    category: "others",
+    items: [["Sewa kamar", 1, 1500000]],
+  },
   {
     description: "Toko Sumber Rejeki",
     category: "uncategorized",
@@ -185,22 +199,6 @@ export const TEMPLATES: ReceiptTemplate[] = [
       ["Gula pasir 1kg", 1, 17500],
       ["Kopi bubuk", 2, 12500],
       ["Sabun batang", 3, 5100],
-    ],
-  },
-  {
-    description: "Warung Bu Tini",
-    category: "",
-    items: [
-      ["Gorengan", 5, 2000],
-      ["Kopi hitam", 1, 5000],
-    ],
-  },
-  {
-    description: "Lotte Mart Gandaria",
-    category: "groceries",
-    items: [
-      ["Susu UHT 1L", 2, 19500],
-      ["Sereal", 1, 52000],
     ],
   },
 ];
@@ -230,13 +228,8 @@ export function buildTransaction(
   template: ReceiptTemplate,
   date: Date
 ): TransactionResponse {
-  const items: TransactionItemResponse[] = template.items.map(
-    ([name, quantity, price]) => ({
-      id: nextMockId("item"),
-      name,
-      quantity,
-      price,
-    })
+  const items: TransactionItem[] = template.items.map(
+    ([name, quantity, price]) => ({ name, quantity, price })
   );
   return {
     id: nextMockId("tx"),
@@ -246,10 +239,8 @@ export function buildTransaction(
       (sum, item) => sum + item.quantity * item.price,
       0
     ),
-    date: date.toISOString(),
+    date: toRfc3339(date),
     items,
-    // Recorded a few minutes after the purchase, like a real scan would be.
-    created_at: new Date(date.getTime() + 7 * 60_000).toISOString(),
   };
 }
 

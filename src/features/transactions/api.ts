@@ -7,11 +7,10 @@ import type {
 } from "@/types/api";
 
 /**
- * Transaction API calls. All routes require auth (apiClient attaches
- * the Bearer token automatically). Response shapes vary slightly per
- * endpoint on the backend ({data: T} vs {message, data: T}), but
- * apiClient already unwraps the outer {data: T} envelope, so callers
- * here just get T back directly.
+ * Transaction API calls (contract §5). All routes require auth (apiClient
+ * attaches the Bearer token). Responses come as {data: T} or
+ * {message, data: T}; apiClient unwraps them, so callers get T directly.
+ * DELETE answers 204 with no body.
  */
 export const transactionsApi = {
   list(signal?: AbortSignal) {
@@ -36,10 +35,10 @@ export const transactionsApi = {
   },
 
   /**
-   * Upload a receipt image — backend extracts description + items via
-   * OpenAI Vision, categorizes it, and creates the transaction in one
-   * step. Field name must be "receipt" to match the Go handler's
-   * c.FormFile("receipt").
+   * Upload a receipt image (form field "receipt", max 5MB) — the backend
+   * reads description + items with AI, categorizes, and saves it in one
+   * step, dated at scan time (UTC). Takes up to ~25s; a 422 means the
+   * receipt couldn't be read and nothing was saved.
    */
   scan(file: File) {
     return apiClient.uploadFile<TransactionResponse>(

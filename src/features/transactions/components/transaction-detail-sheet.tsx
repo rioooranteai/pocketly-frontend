@@ -102,7 +102,10 @@ export function TransactionDetailSheet({
                 initialValues={toTransactionFieldsValue(shown)}
                 onSubmit={(value) =>
                   updateTransaction.mutate(
-                    { id: shown.id, data: toTransactionPayload(value) },
+                    {
+                      id: shown.id,
+                      data: toTransactionPayload(value, shown),
+                    },
                     {
                       onSuccess: () => {
                         toast.success("Perubahan disimpan.");

@@ -74,14 +74,12 @@
   --category-shopping-foreground: #7d3372;
   --category-entertainment: #f9e6b0;
   --category-entertainment-foreground: #7a5500;
-  --category-utilities: #d7ebe1;
-  --category-utilities-foreground: #1d6246;
+  --category-bills: #d7ebe1;
+  --category-bills-foreground: #1d6246;
   --category-health: #f9d8da;
   --category-health-foreground: #9c2c34;
-  --category-education: #dfdcf5;
-  --category-education-foreground: #453d96;
-  --category-other: #e4ded6;
-  --category-other-foreground: #4a4642;
+  --category-others: #e4ded6;
+  --category-others-foreground: #4a4642;
 
   /* Button dark variant */
   --btn-dark: #1a1a1a;
@@ -149,14 +147,12 @@
   --color-category-entertainment-foreground: var(
     --category-entertainment-foreground
   );
-  --color-category-utilities: var(--category-utilities);
-  --color-category-utilities-foreground: var(--category-utilities-foreground);
+  --color-category-bills: var(--category-bills);
+  --color-category-bills-foreground: var(--category-bills-foreground);
   --color-category-health: var(--category-health);
   --color-category-health-foreground: var(--category-health-foreground);
-  --color-category-education: var(--category-education);
-  --color-category-education-foreground: var(--category-education-foreground);
-  --color-category-other: var(--category-other);
-  --color-category-other-foreground: var(--category-other-foreground);
+  --color-category-others: var(--category-others);
+  --color-category-others-foreground: var(--category-others-foreground);
 
   --color-btn-dark: var(--btn-dark);
   --color-btn-dark-hover: var(--btn-dark-hover);

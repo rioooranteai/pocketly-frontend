@@ -3,10 +3,11 @@
 import { useState } from "react";
 
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { getErrorMessage } from "@/lib/api-client";
+import { ApiError, getErrorMessage } from "@/lib/api-client";
 import type { TransactionResponse } from "@/types/api";
 import { useScanReceipt } from "@/features/transactions/hooks";
 import { useReceiptFile } from "@/features/transactions/hooks/use-receipt-file";
+import { useCooldown } from "@/features/transactions/hooks/use-cooldown";
 import { ChooseMethodStep } from "@/features/transactions/components/add-transaction-steps/choose-method-step";
 import { ManualEntryStep } from "@/features/transactions/components/add-transaction-steps/manual-entry-step";
 import { ScanUploadStep } from "@/features/transactions/components/add-transaction-steps/scan-upload-step";
@@ -50,8 +51,11 @@ export function AddTransactionModal({
   const [scanResult, setScanResult] = useState<TransactionResponse | null>(
     null
   );
+  // Set when the receipt couldn't be read (422): offer manual entry too.
+  const [unreadable, setUnreadable] = useState(false);
   const receipt = useReceiptFile();
   const scanReceipt = useScanReceipt();
+  const cooldown = useCooldown();
 
   function handleOpenChange(open: boolean) {
     // Locked while processing — ignore ESC / outside click / close button.
@@ -66,6 +70,7 @@ export function AddTransactionModal({
       return;
     }
     receipt.setError(null);
+    setUnreadable(false);
     setStep("processing");
 
     scanReceipt.mutate(receipt.file, {
@@ -75,6 +80,10 @@ export function AddTransactionModal({
       },
       onError: (err) => {
         receipt.setError(getErrorMessage(err, "Gagal memproses struk."));
+        if (err instanceof ApiError) {
+          setUnreadable(err.status === 422);
+          if (err.status === 429) cooldown.start(err.retryAfter ?? 60);
+        }
         setStep("scan-upload");
       },
     });
@@ -90,7 +99,11 @@ export function AddTransactionModal({
       <DialogContent
         showClose={step !== "processing"}
         preventOutsideClose
-        className={step === "review" ? "max-w-4xl p-0" : undefined}
+        className={
+          step === "review"
+            ? "max-w-4xl p-0 md:flex md:flex-col md:overflow-hidden"
+            : undefined
+        }
       >
         {step === "choose" && (
           <ChooseMethodStep
@@ -106,6 +119,8 @@ export function AddTransactionModal({
             receipt={receipt}
             onBack={backToChoose}
             onSubmit={handleScanSubmit}
+            onManual={unreadable ? () => setStep("manual") : undefined}
+            cooldownSeconds={cooldown.secondsLeft}
           />
         )}
         {step === "processing" && <ScanProcessingStep />}

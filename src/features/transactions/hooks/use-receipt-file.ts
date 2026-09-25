@@ -20,7 +20,7 @@ export function useReceiptFile() {
     if (!selected) return;
 
     if (selected.size > VALIDATION.MAX_FILE_SIZE) {
-      setError("Ukuran gambar maksimal 10MB.");
+      setError("Ukuran gambar maksimal 5MB.");
       return;
     }
 

@@ -1,5 +1,4 @@
 import {
-  BookOpen,
   Car,
   CircleHelp,
   HeartPulse,
@@ -43,25 +42,20 @@ export const CATEGORY_META: Record<Category, CategoryMeta> = {
     tileClassName:
       "bg-category-entertainment text-category-entertainment-foreground",
   },
-  utilities: {
+  bills: {
     label: "Tagihan",
     icon: Zap,
-    tileClassName: "bg-category-utilities text-category-utilities-foreground",
+    tileClassName: "bg-category-bills text-category-bills-foreground",
   },
   health: {
     label: "Kesehatan",
     icon: HeartPulse,
     tileClassName: "bg-category-health text-category-health-foreground",
   },
-  education: {
-    label: "Pendidikan",
-    icon: BookOpen,
-    tileClassName: "bg-category-education text-category-education-foreground",
-  },
-  other: {
+  others: {
     label: "Lainnya",
     icon: Tag,
-    tileClassName: "bg-category-other text-category-other-foreground",
+    tileClassName: "bg-category-others text-category-others-foreground",
   },
   uncategorized: {
     label: "Belum dikategorikan",
@@ -84,14 +78,15 @@ export function isKnownCategory(value: string): value is Category {
 }
 
 /**
- * Display info for any category string. The backend stores category as
- * free text (AI-assigned), so unknown values fall back to the "other"
- * look with their raw name, and empty ones to "uncategorized".
+ * Display info for any category string. The API contract limits category
+ * to TRANSACTION_CATEGORIES, but categorization must never break the UI:
+ * an unexpected value keeps its raw name with the "others" look, and an
+ * empty one shows as "uncategorized".
  */
 export function getCategoryMeta(
   category: string | null | undefined
 ): CategoryMeta {
   if (!category) return CATEGORY_META.uncategorized;
   if (isKnownCategory(category)) return CATEGORY_META[category];
-  return { ...CATEGORY_META.other, label: category };
+  return { ...CATEGORY_META.others, label: category };
 }

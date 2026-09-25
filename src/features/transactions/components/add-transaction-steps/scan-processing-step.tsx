@@ -9,7 +9,7 @@ export function ScanProcessingStep() {
           AI lagi baca struk kamu...
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          Biasanya cuma beberapa detik. Jangan tutup jendela ini dulu.
+          Bisa sampai sekitar 25 detik. Jangan tutup jendela ini dulu.
         </p>
       </div>
     </div>
