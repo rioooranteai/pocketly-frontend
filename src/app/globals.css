@@ -54,6 +54,15 @@
   --chart-4: #f8d6c8; /* light peach */
   --chart-5: #8c8985; /* neutral for comparisons */
 
+  /* Sequential coral ramp for magnitude (activity calendar, emphasis bars).
+     heat-0 = no data. heat-1..4 validated as an ordinal ramp on --card:
+     monotone lightness, visible steps, light end >= 2:1 vs white. */
+  --heat-0: #ece6df;
+  --heat-1: #f0a07f;
+  --heat-2: #e8684a;
+  --heat-3: #c9502f;
+  --heat-4: #94361c;
+
   /* Sidebar — fixed dark, independent of app theme */
   --sidebar: #1c1c1e;
   --sidebar-foreground: #9c9c9c;
@@ -125,6 +134,12 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+
+  --color-heat-0: var(--heat-0);
+  --color-heat-1: var(--heat-1);
+  --color-heat-2: var(--heat-2);
+  --color-heat-3: var(--heat-3);
+  --color-heat-4: var(--heat-4);
 
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);

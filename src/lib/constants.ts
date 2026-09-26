@@ -36,6 +36,16 @@ export const STORAGE_KEYS = {
 } as const;
 
 /**
+ * Session marker cookie — mirrors "has a token" from the auth store so
+ * src/proxy.ts (which can't read localStorage) can redirect optimistically.
+ * Holds no secret; the token itself stays in localStorage.
+ */
+export const SESSION_COOKIE = {
+  NAME: "pocketly_session",
+  MAX_AGE: 60 * 60 * 24 * 30, // 30 days
+} as const;
+
+/**
  * Transaction categories — the closed set the backend assigns (API
  * contract §3). "others" is a confident "none of the above";
  * "uncategorized" means the AI couldn't decide.

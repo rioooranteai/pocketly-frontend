@@ -41,6 +41,11 @@ const twMerge = extendTailwindMerge({
         "chart-3",
         "chart-4",
         "chart-5",
+        "heat-0",
+        "heat-1",
+        "heat-2",
+        "heat-3",
+        "heat-4",
         "sidebar",
         "sidebar-foreground",
         "sidebar-primary",
@@ -88,6 +93,19 @@ export function formatCurrency(amount: number): string {
     currency: "IDR",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
+  }).format(amount);
+}
+
+/**
+ * Short IDR for chart axes and tight tiles.
+ * Example: 3250000 -> "Rp 3,3 jt", 850000 -> "Rp 850 rb"
+ */
+export function formatCompactCurrency(amount: number): string {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    notation: "compact",
+    maximumFractionDigits: 1,
   }).format(amount);
 }
 

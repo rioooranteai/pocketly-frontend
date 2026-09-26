@@ -75,6 +75,79 @@ export interface TransactionResponse {
   items: TransactionItem[];
 }
 
+// ============ Dashboard Types (PROPOSED) ============
+//
+// Draft shape for a dedicated `GET /api/v1/dashboard` — NOT in the backend
+// contract yet. Until it ships, the FE renders it from dummy data
+// (features/dashboard/mock-data.ts). Update these when the contract lands.
+// All amounts are expenses in IDR, aggregated in the user's timezone.
+
+export interface DashboardSummary {
+  /** Spending from the 1st of this month up to now. */
+  month_total: number;
+  /** Last month over the same number of days, for a fair comparison. */
+  previous_month_to_date_total: number;
+  transaction_count: number;
+  /** month_total / days elapsed this month. */
+  daily_average: number;
+  /** Days this month with at least one transaction. */
+  active_days: number;
+  /** Consecutive days, ending today, with at least one transaction. */
+  current_streak: number;
+}
+
+/** Nested spending scopes: today ⊂ this week ⊂ this month ⊂ this year. */
+export interface DashboardScopes {
+  year: number;
+  month: number;
+  /** Monday of this week up to now. */
+  week: number;
+  today: number;
+}
+
+export interface MonthlyTotal {
+  /** yyyy-mm */
+  month: string;
+  total: number;
+}
+
+export interface DailyTotal {
+  /** yyyy-mm-dd, local calendar date. */
+  date: string;
+  total: number;
+  count: number;
+}
+
+export interface CategoryTotal {
+  category: Category;
+  total: number;
+  count: number;
+}
+
+export interface TopItem {
+  name: string;
+  /** Sum of item quantities this month. */
+  quantity: number;
+  total: number;
+  /** How many transactions contained the item. */
+  transaction_count: number;
+}
+
+export interface DashboardResponse {
+  /** RFC 3339 */
+  generated_at: string;
+  summary: DashboardSummary;
+  scopes: DashboardScopes;
+  /** Last 12 months, oldest first; the current month is partial. */
+  monthly_trend: MonthlyTotal[];
+  /** Last 35 days, oldest first, ending today; empty days included as 0. */
+  daily: DailyTotal[];
+  /** This month, highest total first. */
+  categories: CategoryTotal[];
+  /** This month, highest total first, at most 5. */
+  top_items: TopItem[];
+}
+
 // ============ Envelopes ============
 
 /** GET /transactions and GET /transactions/:id. */

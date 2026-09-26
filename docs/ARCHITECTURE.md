@@ -70,8 +70,13 @@ src/
 │   │   ├── types.ts              # Form-side types
 │   │   └── utils.ts              # Form <-> API payload mapping
 │   └── dashboard/
-│       ├── components/           # Summary cards
-│       └── utils.ts              # summarizeMonth
+│       ├── components/           # Widgets, general → specific (see
+│       │                         # dashboard-view.tsx for the grid order)
+│       ├── hooks/                # useDashboard
+│       ├── api.ts                # Dummy data until GET /dashboard ships
+│       ├── mock-data.ts          # Seeded, self-consistent dummy data
+│       ├── query-keys.ts         # dashboardKeys factory
+│       └── utils.ts              # Chart helpers (calendar, heat levels)
 │
 ├── lib/                          # Utilities & configuration
 │   ├── api-client.ts             # HTTP client, ApiError, getErrorMessage
@@ -243,8 +248,18 @@ Hanya aktif di development; badge "Mode data dummy" tampil di bawah layar.
 | **Income (positive)**              | `text-income` / `bg-income`   | `#22A06B`              |
 | **Expense/warning (negative)**     | `text-expense` / `bg-expense` | `#E5484D`              |
 | Chart layers                       | `bg-chart-1` … `bg-chart-5`   | Coral → peach gradient |
+| Magnitude ramp (calendar, bars)    | `bg-heat-0` … `bg-heat-4`     | Empty → dark coral     |
 
 **Semantic finance rule:** Always use `income`/`expense` tokens (not `primary`) for money direction indicators — e.g. `+Rp50.000` in green, `-Rp50.000` in red. `primary` (coral) is reserved for brand/CTA/neutral UI, not for signaling good/bad.
+
+### Charts
+
+Recharts for axis charts (area, bar); plain HTML/SVG for the rest. Rules:
+one series = one color (`primary`), emphasis = one bar in `primary` and
+the rest in `heat-1`, magnitude = the `heat-*` ramp (validated: monotone
+lightness, light end ≥ 2:1 on white). Text never takes the series color.
+Every chart has an `sr-only` table twin. Runtime widths (progress bars)
+use SVG `width` attributes, not inline styles.
 
 ### Border Radius
 
